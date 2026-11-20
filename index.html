@@ -941,14 +941,29 @@ scene('sSleep',(s,t)=>{
   // meja kecil + hp
   R(c,8,64,26,22,'#3a2f4a');R(c,8,64,26,2,'#4a3d5c');R(c,16,61,10,3,'#111');
   const glow=(t%6)<3; if(glow){R(c,17,61,8,2,'#7fb8e6');disc(c,21,58,6,'rgba(127,184,230,0.12)');}
-  // kasur
-  R(c,40,66,118,10,'#4a3d5c');R(c,40,60,118,6,'#d8d0e8');
-  R(c,116,48,36,13,'#e9e4f5');R(c,116,60,36,1,'#cfc6e0');
-  const breathe=Math.sin(t*1.4)>0?0:1;
-  c.drawImage(SP.sleep,120,43+breathe);
-  R(c,40,58+breathe,84,20,'#d39a35');for(let x=42;x<124;x+=7)R(c,x,58+breathe,2,20,'#b98128');R(c,40,66+breathe,84,2,'#8e1b1b');
-  R(c,118,57+breathe,10,6,'#d39a35');
-  R(c,0,86,160,14,'#1e1a36');
+  // lantai
+  R(c,0,84,160,16,'#1e1a36');
+  // tempat tidur (dilihat dari samping, kepala di kanan)
+  R(c,150,36,7,48,'#6b4a5a');R(c,149,34,9,3,'#7d5a6b');R(c,152,40,3,30,'#5a3d4c');   // sandaran kepala
+  R(c,36,54,5,30,'#6b4a5a');R(c,35,52,7,3,'#7d5a6b');                              // sandaran kaki
+  R(c,40,70,111,6,'#5a3d4c');R(c,42,76,3,8,'#4a3040');R(c,146,76,3,8,'#4a3040');   // rangka + kaki
+  R(c,41,62,109,8,'#e9e4f5');R(c,41,69,109,1,'#cfc6e0');                           // kasur
+  // bantal
+  R(c,123,52,26,10,'#ffffff');R(c,122,53,28,8,'#ffffff');R(c,123,61,26,1,'#ddd6ea');
+  // kepala
+  const br=Math.sin(t*1.4);                     // napas pelan
+  c.drawImage(SP.sleep,124,42);
+  // selimut mengikuti bentuk badan: kaki, pinggul, dada
+  for(let x=41;x<=130;x++){
+    const feet=4*Math.exp(-Math.pow((x-52)/6,2)), hip=6*Math.exp(-Math.pow((x-82)/14,2)), chest=(5+br*0.8)*Math.exp(-Math.pow((x-112)/9,2));
+    const top=Math.round(62-1-feet-hip-chest);
+    R(c,x,top,1,73-top,'#d39a35');                 // menjuntai sedikit lewat pinggir kasur
+    if(x%7<2)R(c,x,top+2,1,71-top,'#c28a2c');       // motif garis
+    R(c,x,top,1,1,'#e6b04c');                      // highlight atas
+  }
+  R(c,41,70,90,2,'#8e1b1b');R(c,41,72,90,1,'#141414');   // pinggiran ala ulos
+  // lipatan selimut di dada
+  for(let x=124;x<=131;x++){const top=Math.round(62-1-(5+br*0.8)*Math.exp(-Math.pow((x-112)/9,2)));R(c,x,top-1,1,4,'#fffaf0');}
   // Zzz
   for(let k=0;k<3;k++){const p=(t*0.35+k/3)%1,x=142+p*10+Math.sin(p*6)*2,y=42-p*24,sz=1+Math.floor(p*2);
     c.globalAlpha=1-p;R(c,x,y,3*sz,sz,'#cfc6e6');R(c,x+sz,y+sz,sz,sz,'#cfc6e6');R(c,x,y+2*sz,3*sz,sz,'#cfc6e6');}
