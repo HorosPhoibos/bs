@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sebelum Tidur</title>
+<meta name="description" content="Cerita pendek buat dibaca pelan-pelan sebelum tidur.">
+<meta name="theme-color" content="#1c1d45">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#fff7ea; --muted:#cfc6e6; --gold:#f2c14e; --card:rgba(16,16,44,.62);
+    --line:rgba(255,255,255,.12); --pink:#ff9fb4;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:#f4b886;color:var(--ink);font:17px/1.7 Nunito,system-ui,sans-serif;
+       -webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background-color .2s linear}
+  #sky{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0}
+  main{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:0 16px 120px}
+  canvas.px{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
+  .pixel{font-family:"Pixelify Sans",monospace}
+
+  /* hero */
+  .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;color:#2a1b3d;padding:40px 0}
+  .hero h1{font-family:"Pixelify Sans",monospace;font-weight:600;font-size:clamp(44px,13vw,72px);line-height:1;margin:18px 0 10px;letter-spacing:1px}
+  .hero p{margin:4px 0;max-width:30ch}
+  .hero .greet{margin-top:18px;font-weight:700}
+  .hero .tiny-moon{width:72px}
+  .scrollhint{margin-top:42px;font-family:"Pixelify Sans";font-size:15px;opacity:.75;animation:bob 1.8s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(6px)}}
+
+  .btn{font-family:"Pixelify Sans",monospace;font-size:16px;border:0;cursor:pointer;color:#2a1b3d;background:var(--gold);
+       padding:10px 16px;box-shadow:0 4px 0 #b9862a, 0 0 0 3px #2a1b3d;margin-top:22px;border-radius:2px}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #b9862a,0 0 0 3px #2a1b3d}
+
+  .ulos{height:24px;margin:56px -16px;background-repeat:repeat-x;background-size:auto 24px;image-rendering:pixelated;cursor:pointer}
+
+  .chapter{margin-top:24px}
+  .chap-label{font-family:"Pixelify Sans";font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:center}
+  .chap-title{font-family:"Pixelify Sans";font-weight:600;font-size:clamp(30px,8vw,42px);text-align:center;margin:4px 0 22px;line-height:1.1;text-shadow:0 3px 0 rgba(42,27,61,.45)}
+  .chap-label{text-shadow:0 1px 0 rgba(42,27,61,.4)}
+  .chap-title .first{color:var(--gold)}
+
+  .frame{position:relative;padding:6px;background:#1a1530;box-shadow:0 0 0 3px #f2e3c6,0 0 0 6px #1a1530,0 14px 30px rgba(0,0,0,.35);margin:10px 6px 26px}
+  .frame canvas{cursor:pointer}
+  .tap{position:absolute;right:12px;bottom:12px;font-family:"Pixelify Sans";font-size:12px;background:rgba(0,0,0,.55);padding:2px 8px;color:#fff;pointer-events:none;animation:pulse 2s infinite}
+  @keyframes pulse{50%{opacity:.4}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px;margin:16px 0;
+        backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .card p{margin:0 0 10px}.card p:last-child{margin:0}
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .9s ease,transform .9s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  .bubble{position:relative;background:#fff7ea;color:#2a1b3d;border-radius:12px;padding:12px 14px;font-weight:600;margin:6px 0 18px;
+          min-height:50px;transition:transform .25s}
+  .bubble:before{content:"";position:absolute;top:-8px;left:28px;border:8px solid transparent;border-top:0;border-bottom-color:#fff7ea}
+  .bubble.pop{transform:scale(1.03)}
+
+  /* receipt */
+  .receipt{background:#fffaf0;color:#2b2b2b;font-family:"Pixelify Sans",monospace;font-size:15px;padding:18px 18px 22px;margin:20px 10px;
+           box-shadow:0 10px 24px rgba(0,0,0,.3);transform:rotate(-1.2deg);position:relative;
+           -webkit-mask:radial-gradient(circle 6px at 50% 100%,transparent 98%,#000) 0 0/14px 100%}
+  .receipt h4{margin:0 0 4px;text-align:center;font-size:17px;letter-spacing:2px}
+  .receipt .sub{text-align:center;font-size:12px;opacity:.6;margin-bottom:12px}
+  .receipt .row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed #ccc;padding:5px 0}
+  .receipt .row b{font-weight:600;text-align:right;white-space:nowrap}
+  .receipt .ok{margin-top:12px;text-align:center;color:#1f7a3f;font-weight:600}
+
+  /* quiz */
+  .q{font-weight:700;margin-bottom:12px;min-height:3.4em}
+  .qbtns{display:flex;gap:10px}
+  .qbtns button{flex:1;font-family:"Pixelify Sans";font-size:16px;padding:10px;border:0;border-radius:4px;cursor:pointer;color:#2a1b3d;background:#fff7ea;box-shadow:0 4px 0 #bdb3d6}
+  .qbtns button:active{transform:translateY(3px);box-shadow:0 1px 0 #bdb3d6}
+  .dots{display:flex;gap:6px;margin-top:14px;justify-content:center}
+  .dots i{width:10px;height:10px;background:rgba(255,255,255,.25)}
+  .dots i.on{background:var(--gold)}
+  .result{display:none}
+  .result.show{display:block;animation:fade 1s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}}
+  .again{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;padding:0;margin-top:8px}
+
+  /* passport */
+  .trip{position:relative;margin:30px 0 40px}
+  .trip .frame{margin-bottom:14px}
+  .trip h3{font-family:"Pixelify Sans";font-size:24px;margin:0 6px 4px;display:flex;align-items:baseline;gap:10px}
+  .trip h3 small{font-size:13px;color:var(--muted);font-weight:400;letter-spacing:1px}
+  .trip p{margin:0 6px}
+  .stamp{position:absolute;top:14px;right:16px;z-index:2;font-family:"Pixelify Sans";font-weight:600;font-size:14px;letter-spacing:2px;
+         padding:4px 10px;border:3px solid currentColor;border-radius:6px;transform:rotate(9deg) scale(1.6);opacity:0;
+         transition:transform .45s cubic-bezier(.2,1.6,.4,1),opacity .2s;background:rgba(255,250,240,.85)}
+  .trip.in .stamp{transform:rotate(9deg) scale(1);opacity:1}
+  .stamp.done{color:#1f7a3f}.stamp.soon{color:#c0392b}.stamp.home{color:#8e1b1b}.stamp.blank{color:#777;border-style:dashed}
+  .blank-box{border:2px dashed rgba(255,255,255,.35);border-radius:6px;aspect-ratio:160/90;display:grid;place-items:center;margin:10px 6px 14px;
+             font-family:"Pixelify Sans";font-size:40px;color:rgba(255,255,255,.4)}
+
+  .route{position:relative;height:44px;margin:26px 8px 6px;font-family:"Pixelify Sans";font-size:12px;color:var(--muted)}
+  .route .line{position:absolute;left:46px;right:40px;top:20px;border-top:2px dashed rgba(255,255,255,.35)}
+  .route .dot{position:absolute;top:12px}.route .a{left:0}.route .b{right:0}
+  .route .plane{position:absolute;top:6px;left:46px;font-size:22px;color:var(--gold);transition:left .2s linear}
+  .stamps{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 4px 10px}
+  .st{font-family:"Pixelify Sans";color:var(--c);background:rgba(255,250,240,.92);border:3px solid var(--c);border-radius:8px;padding:8px 8px;
+      text-align:center;transform:rotate(var(--r));line-height:1.25}
+  .st b{display:block;font-size:14px;letter-spacing:1px}.st small{font-size:11px;opacity:.85}
+  .prayer{font-style:italic}
+  .verse{margin-top:14px;font-size:14px;color:var(--muted);font-style:normal}
+
+  .moonbox{display:flex;gap:8px;margin-top:10px}
+  .moonbox input{flex:1;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--ink)}
+  .moonbox input::placeholder{color:#a9a1c4}
+  .moonbox button{font-family:"Pixelify Sans";border:0;border-radius:8px;padding:0 14px;background:var(--gold);color:#2a1b3d;cursor:pointer;font-size:15px}
+  .moonreply{margin-top:12px;min-height:1.5em;color:#fff2c2;font-weight:600}
+
+  .ending{text-align:center;margin:60px 0 20px}
+  .ending h2{font-family:"Pixelify Sans";font-size:clamp(32px,9vw,46px);margin:0 0 10px}
+  .ending p{color:var(--muted);margin:4px 0}
+  footer{text-align:center;color:#8f88ad;font-size:13px;margin-top:70px;user-select:none;-webkit-user-select:none}
+  .sparkle{display:inline-block;font-size:22px;padding:14px;cursor:pointer;color:#6d6690;transition:color .3s,transform .3s;-webkit-touch-callout:none}
+  .sparkle.hold{color:var(--gold);transform:scale(1.4) rotate(20deg)}
+  .secret{max-height:0;overflow:hidden;opacity:0;transition:all 1s ease;color:#ffe7b0;font-size:15px}
+  .secret.show{max-height:160px;opacity:1;margin-top:8px}
+  .ps{font-size:11px;opacity:.55;margin-top:24px}
+
+  .banner{display:none;align-items:center;gap:12px;background:rgba(255,250,240,.9);color:#2a1b3d;border-radius:12px;padding:10px 14px;margin:-40px 0 30px;font-weight:600;font-size:15px}
+  .banner.show{display:flex}
+  .banner canvas{width:44px;flex:none}
+
+  #music{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:10;font-family:"Pixelify Sans";font-size:15px;border:0;cursor:pointer;
+         padding:10px 14px;border-radius:30px;background:rgba(255,247,234,.95);color:#2a1b3d;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+  #music.on{background:var(--gold)}
+  #music .eq{display:inline-flex;gap:2px;align-items:flex-end;height:12px;margin-left:6px;vertical-align:middle}
+  #music .eq i{width:3px;background:#2a1b3d;height:3px}
+  #music.on .eq i{animation:eq .9s ease-in-out infinite}
+  #music.on .eq i:nth-child(2){animation-delay:.2s}#music.on .eq i:nth-child(3){animation-delay:.4s}
+  @keyframes eq{50%{height:12px}}
+
+  #toast{position:fixed;left:50%;top:22px;transform:translate(-50%,-90px);z-index:20;background:#fff7ea;color:#2a1b3d;font-family:"Pixelify Sans";
+         padding:10px 18px;border-radius:30px;box-shadow:0 0 0 3px #8e1b1b,0 8px 20px rgba(0,0,0,.35);transition:transform .45s cubic-bezier(.2,1.4,.4,1);
+         max-width:calc(100% - 32px);text-align:center}
+  #toast.show{transform:translate(-50%,0)}
+
+  @media (prefers-reduced-motion:reduce){.reveal{transition:none;opacity:1;transform:none}.scrollhint{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <canvas class="px tiny-moon" id="heroMoon" width="24" height="24" aria-hidden="true"></canvas>
+    <h1>Sebelum Tidur</h1>
+    <p>cerita pendek, buat dibaca pelan-pelan</p>
+    <p class="greet" id="greet"></p>
+    <button class="btn" id="startMusic">♪ nyalakan musik dulu</button>
+    <div class="scrollhint">scroll pelan-pelan ↓</div>
+  </section>
+
+  <div class="banner" id="sunday"><canvas class="px" id="church" width="16" height="16"></canvas><span id="sundayText"></span></div>
+
+  <div class="ulos" title="tap aku"></div>
+
+  <!-- BAB 1 -->
+  <section class="chapter">
+    <div class="chap-label">Bab 1</div>
+    <h2 class="chap-title"><span class="first">B</span>el Pulang</h2>
+
+    <div class="frame reveal"><canvas class="px" id="sOffice" width="160" height="100"></canvas><span class="tap">tap orangnya</span></div>
+    <div class="bubble reveal" id="officeBubble">Jam lima sore. Harusnya pulang. Tapi antreannya masih ada… oke, lembur dikit.</div>
+
+    <div class="card reveal">
+      <p>Telepon terakhir hari ini baru saja ditutup.</p>
+      <p>Seharian ada yang panik kartunya keblokir, ada yang lupa PIN untuk ketiga kalinya, ada bapak-bapak yang sebenarnya cuma pengen ditemenin ngobrol. Semuanya dijawab dengan suara yang sama sabarnya.</p>
+    </div>
+
+    <div class="receipt reveal">
+      <h4>STRUK HARI INI</h4>
+      <div class="sub" id="receiptDate"></div>
+      <div class="row"><span>Telepon diangkat</span><b>banyak bgt</b></div>
+      <div class="row"><span>Masalah orang diberesin</span><b>hampir semua</b></div>
+      <div class="row"><span>Senyum yang kedengaran</span><b>100%</b></div>
+      <div class="row"><span>Bilang "ada lagi yang bisa dibantu?"</span><b>∞</b></div>
+      <div class="row"><span>Antrean vs jam pulang</span><b>antrean menang</b></div>
+      <div class="row"><span>Jam lembur</span><b>+2 (demi tiket ✈️)</b></div>
+      <div class="row"><span>Yang nanya balik "kamu capek nggak?"</span><b>1</b></div>
+      <div class="ok">STATUS: BOLEH ISTIRAHAT ✓</div>
+    </div>
+
+    <div class="card reveal">
+      <p>Orang bilang kerja di telepon itu nggak kelihatan. Padahal senyum ternyata bisa kedengaran.</p>
+      <p>Dan kelihatan banget kok, kamu sayang sama kerjaan ini. Yang kayak gitu nggak bisa dipalsuin.</p>
+      <p>Lemburnya juga bukan tanpa alasan. Tiap jam tambahan itu diam-diam ditukar jadi tiket ke tempat baru. Nanti di bab 3 kelihatan.</p>
+    </div>
+  </section>
+
+  <div class="ulos" title="tap aku"></div>
+
+  <!-- BAB 2 -->
+  <section class="chapter">
+    <div class="chap-label">Bab 2</div>
+    <h2 class="chap-title"><span class="first">O</span>brolan dengan Bulan</h2>
+
+    <div class="card reveal"><p>Sampai kamar. Seragam digantung, ganti baju yang paling nyaman. Jendela dibuka sedikit.</p>
+      <p>Bulan malam ini kebetulan lagi pengen ngobrol.</p></div>
+
+    <div class="frame reveal"><canvas class="px" id="sRoom" width="160" height="100"></canvas><span class="tap">tap bulannya</span></div>
+    <div class="bubble reveal" id="moonBubble">…</div>
+
+    <div class="card reveal">
+      <p>Terus bulan nanya pelan, kayak takut salah ngomong:</p>
+      <p><b>"Yang bikin kamu bengong dari tadi… soal dia, ya?"</b></p>
+      <p>Kadang hati berdiri di persimpangan. Satu jalan ada lenteranya. Satu lagi berkabut, dan kamu nggak pernah yakin ujungnya ke mana.</p>
+    </div>
+
+    <div class="frame reveal"><canvas class="px" id="sCross" width="160" height="100"></canvas></div>
+
+    <div class="card reveal" id="quiz">
+      <div class="q" id="qText"></div>
+      <div class="qbtns"><button data-a="1">iya</button><button data-a="0">enggak</button></div>
+      <div class="dots" id="qDots"></div>
+      <p style="font-size:13px;color:var(--muted);margin-top:12px;text-align:center">jawab jujur aja, nggak ada yang ngintip. tiap jawaban, kabutnya menipis.</p>
+    </div>
+    <div class="card result" id="qResult"></div>
+  </section>
+
+  <div class="ulos" title="tap aku"></div>
+
+  <!-- BAB 3 -->
+  <section class="chapter">
+    <div class="chap-label">Bab 3</div>
+    <h2 class="chap-title"><span class="first">R</span>ute Mimpi</h2>
+
+    <div class="card reveal"><p>Sebelum tidur, biasanya kepala jalan-jalan duluan.</p>
+      <p>Ini paspor milik seorang <i>explorer</i>. Miskin tapi internasional, katanya. Halaman depannya udah lumayan penuh cap.</p></div>
+
+    <div class="route reveal" aria-hidden="true"><span class="dot a">lembur</span><span class="line"></span><span class="plane" id="plane">✈</span><span class="dot b">dunia</span></div>
+
+    <div class="stamps reveal">
+      <div class="st" style="--r:-6deg;--c:#1f7a3f"><b>SEBESI · KRAKATAU</b><small>langganan bumi premium ✓</small></div>
+      <div class="st" style="--r:5deg;--c:#2453a8"><b>PULAU SANGIANG</b><small>wonderful ✓</small></div>
+      <div class="st" style="--r:-3deg;--c:#8e1b1b"><b>PRAMBANAN</b><small>outing kantor ✓</small></div>
+      <div class="st" style="--r:7deg;--c:#6b3fa0"><b>SINGAPURA</b><small>pernah. mau lagi? ENGGA.</small></div>
+      <div class="st" style="--r:-5deg;--c:#c0392b"><b>MALAYSIA</b><small>tetangga, wajib ✓</small></div>
+      <div class="st" style="--r:4deg;--c:#8a5a0e"><b>THAILAND</b><small>sawasdee ka ✓</small></div>
+      <div class="st" style="--r:-7deg;--c:#1f7a3f"><b>VIETNAM</b><small>xin chào ✓</small></div>
+      <div class="st" style="--r:3deg;--c:#777;border-style:dashed"><b>NEXT TRIP</b><small>P info‼️</small></div>
+    </div>
+
+    <div class="trip reveal">
+      <span class="stamp done">SUDAH ✓</span>
+      <div class="frame"><canvas class="px" id="sBali" width="160" height="90"></canvas></div>
+      <h3>Bali <small>SOLO TRIP</small></h3>
+      <p>Pernah ke sini sendirian. <i>Sendirian.</i> Tahu nggak sih itu butuh nyali segede apa? Makanya Bali dapat satu halaman penuh sendiri.</p>
+    </div>
+
+    <div class="trip reveal">
+      <span class="stamp soon">SEGERA</span>
+      <div class="frame"><canvas class="px" id="sFiji" width="160" height="90"></canvas></div>
+      <h3>Fiji <small>"MUSIM GUGUR"</small></h3>
+      <p>Rencananya pas musim gugur. Fakta kecil: Fiji ada di belahan bumi selatan dan iklimnya tropis, jadi musim gugurnya sekitar Maret–Mei dan tetap hangat. Daun palemnya nggak ikut gugur. Yang gugur cuma alasan buat nggak berangkat. <b>Bula!</b> 🌺</p>
+    </div>
+
+    <div class="trip reveal">
+      <span class="stamp soon">SEGERA</span>
+      <div class="frame"><canvas class="px" id="sSnow" width="160" height="90"></canvas></div>
+      <h3>Negeri Salju <small>PERTAMA KALI</small></h3>
+      <p>Lihat salju beneran untuk pertama kalinya. Jaket tebal, tangan dingin, terus ketawa sendiri karena napasnya keluar jadi asap.</p>
+    </div>
+
+    <div class="trip reveal">
+      <span class="stamp soon">SEGERA</span>
+      <div class="frame"><canvas class="px" id="sEgypt" width="160" height="90"></canvas></div>
+      <h3>Mesir <small>GIZA</small></h3>
+      <p>Berdiri di depan piramida yang umurnya sekitar 4.500 tahun. Terus sadar: nasabah yang ngomel minggu lalu itu ternyata kecil banget ya, di hadapan sejarah.</p>
+    </div>
+
+    <div class="trip reveal">
+      <span class="stamp blank">???</span>
+      <div class="blank-box">?</div>
+      <h3>Halaman kosong <small>KAMU YANG ISI</small></h3>
+      <p>Paspor mimpi sengaja dikasih halaman lebih. Nanti kamu yang tentuin.</p>
+    </div>
+
+    <div class="trip reveal">
+      <span class="stamp home">RUMAH</span>
+      <div class="frame"><canvas class="px" id="sToba" width="160" height="90"></canvas></div>
+      <h3>Bage, Simalungun <small>PULANG</small></h3>
+      <p>Sejauh apa pun jalannya, pulangnya tetap ke sini. Kampung kecil yang halaman belakangnya langsung Danau Toba, tempat semuanya dimulai. Tardidi di GKPS, nanti dipasu-pasu pun di GKPS 🤍 <b>Horas!</b></p>
+    </div>
+  </section>
+
+  <div class="ulos" title="tap aku"></div>
+
+  <!-- BAB 4 -->
+  <section class="chapter">
+    <div class="chap-label">Bab 4</div>
+    <h2 class="chap-title"><span class="first">A</span>min</h2>
+
+    <div class="card reveal"><p>Lampu dimatikan. HP ditaruh (nanti, setelah ini). Selimut ditarik sampai dagu.</p></div>
+
+    <div class="frame reveal"><canvas class="px" id="sSleep" width="160" height="100"></canvas></div>
+
+    <div class="card reveal prayer">
+      <p>Tuhan, makasih buat hari ini.<br>Buat suara yang tetap sabar walau capek.<br>Buat mimpi-mimpi yang masih panjang.<br>Jaga hatiku, terangi jalanku,<br>dan biar besok aku bangun dengan tenang.<br>Amin.</p>
+      <p class="verse">"Dengan tenteram aku mau membaringkan diri, lalu segera tidur, sebab hanya Engkaulah, ya TUHAN, yang membiarkan aku diam dengan aman." (Mazmur 4:9)</p>
+    </div>
+
+    <div class="card reveal">
+      <p>Sebelum merem, mau titip sesuatu ke bulan?</p>
+      <div class="moonbox"><input id="moonInput" placeholder="tulis apa aja…" maxlength="80" autocomplete="off"><button id="moonSend">kirim</button></div>
+      <div class="moonreply" id="moonReply"></div>
+    </div>
+
+    <p class="reveal" style="text-align:center;color:var(--muted);margin-top:50px">Lihat ke atas sebentar.</p>
+    <canvas class="px" id="sConst" width="200" height="72" style="margin:10px 0"></canvas>
+
+    <div class="ending reveal">
+      <h2>Selamat tidur.</h2>
+      <p>dari bulan,</p>
+      <p>dan seseorang yang nitip salam lewat bulan.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span class="sparkle" id="sparkle" aria-label="rahasia">✦</span>
+    <div class="secret" id="secret">ada yang diam-diam senang tiap kamu senyum.<br>udah, itu aja. tidur gih 🌙</div>
+    <div>dibuat pelan-pelan, buat dibaca pelan-pelan.</div>
+    <div class="ps">p.s. huruf pertama tiap bab</div>
+  </footer>
+</main>
+
+<button id="music" aria-pressed="false">♪ musik<span class="eq"><i></i><i></i><i></i></span></button>
+<div id="toast"></div>
+
+<script>
+(() => {
+"use strict";
+const $ = s => document.querySelector(s);
+const now = new Date();
+const hour = now.getHours(), day = now.getDay();
+
+/* ---------- helpers ---------- */
+const hex = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+function mix(stops,p){
+  p=Math.max(0,Math.min(1,p)); const n=stops.length-1, i=Math.min(n-1,Math.floor(p*n)), f=p*n-i;
+  const a=hex(stops[i]), b=hex(stops[i+1]);
+  return `rgb(${a.map((v,k)=>Math.round(v+(b[k]-v)*f)).join(',')})`;
+}
+function R(c,x,y,w,h,col){c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
+function disc(c,cx,cy,r,col){c.fillStyle=col;for(let y=-r;y<=r;y++){const w=Math.floor(Math.sqrt(r*r-y*y));c.fillRect(Math.round(cx-w),Math.round(cy+y),w*2+1,1);}}
+function vgrad(c,x,y,w,h,stops,bands=8){for(let i=0;i<h;i++){const q=Math.floor(i/h*bands)/(bands-1);R(c,x,y+i,w,1,mix(stops,q));}}
+function rnd(seed){let s=seed;return()=>((s=Math.imul(s^s>>>15,1|s)+0x6D2B79F5|0,(s>>>0)%10000)/10000);}
+function sprite(rows,pal,scale=1){
+  const w=Math.max(...rows.map(r=>r.length)),h=rows.length,cv=document.createElement('canvas');
+  cv.width=w*scale;cv.height=h*scale;const x=cv.getContext('2d');
+  rows.forEach((r,j)=>[...r].forEach((ch,i)=>{const col=pal[ch];if(col){x.fillStyle=col;x.fillRect(i*scale,j*scale,scale,scale);}}));
+  return cv;
+}
+let toastT;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
+
+/* ---------- sprites ---------- */
+const GIRL=[
+"....hhhhhhhh....",
+"...hhhhhhhhhh...",
+"..hhhHHhhhhhhh..",
+".ghhhhhhhhhhhhg.",
+".ghhsssssssshhg.",
+".ghsssssssssshg.",
+".ghseesssseeshg.",
+".hgsbssssssbshh.",
+".hhgsssmmsssshh.",
+".hhh.ssssss.hhh.",
+".hhh..wssw..hhh.",
+".hhuuuwwwwuuuhh.",
+".hhuuuuwwuuuuhh.",
+"..huuuuwwuuuuh..",
+"..suuuuuuuuuus..",
+"...uuuuyuuuuu...",
+"...UUUUUUUUUU...",
+"...kkkkkkkkkk...",
+"...kkkkkkkkkk...",
+"....ss....ss....",
+"....ss....ss....",
+"...kkk....kkk..."];
+const BASE={h:'#1b1420',H:'#4a3550',s:'#f6cfae',S:'#e0a98a',e:'#2a1a22',b:'#f39a9a',m:'#c94a62',
+  u:'#2453a8',U:'#183c80',w:'#f7f7f7',g:'#5a5e72',k:'#27304a',y:'#f2c14e'};
+const blinkPal={...BASE,e:'#e0a98a'};
+const homePal={...BASE,u:'#e6a93a',U:'#c98e2a',w:'#f6cfae',y:'#e6a93a',g:'#1b1420',k:'#3a3f66'};
+const homeBlink={...homePal,e:'#e0a98a'};
+const SLEEP=[
+"...hhhhhh...",
+".hhhhhhhhhh.",
+"hhhhhhhhhhhh",
+"hhsssssssshh",
+"hssssssssssh",
+"hsEEssssEEsh",
+"hsbssssssbsh",
+"hhsssmmssshh",
+".hhsssssshh."];
+const BACK=[
+"..hhh..",
+".hhhhh.",
+".hhhhh.",
+".hhhhh.",
+"uhhhhhu",
+"uuhhhuu",
+"uuuuuuu",
+".uuuuu.",
+".kkkkk.",
+"..s.s..",
+"..k.k.."];
+const HEART=[".pp.pp.","ppppppp","ppppppp",".ppppp.","..ppp..","...p..."];
+const CAMEL1=["........cc.",".......ccc.","..cc...c...",".cccc.cc...","cccccccc...",".cccccc....",".c.c.c.c...",".c.c.c.c..."];
+const CAMEL2=["........cc.",".......ccc.","..cc...c...",".cccc.cc...","cccccccc...",".cccccc....","..c.c.c.c..","..c.c.c.c.."];
+
+const SP={
+  girl:sprite(GIRL,BASE,2), girlBlink:sprite(GIRL,blinkPal,2),
+  home:sprite(GIRL,homePal,2), homeBlink:sprite(GIRL,homeBlink,2),
+  sleep:sprite(SLEEP,{h:'#1b1420',s:'#f6cfae',E:'#5a3a3a',b:'#f39a9a',m:'#c94a62'},2),
+  back:sprite(BACK,{h:'#1b1420',u:'#e6a93a',k:'#3a3f66',s:'#f6cfae'},2),
+  coat:sprite(BACK,{h:'#1b1420',u:'#c0392b',k:'#2c2c3a',s:'#f6cfae'},1),
+  shadowGirl:sprite(BACK,{h:'#2a1a2e',u:'#2a1a2e',k:'#2a1a2e',s:'#2a1a2e'},1),
+  homeGirl:sprite(BACK,{h:'#1b1420',u:'#e6a93a',k:'#3a3f66',s:'#f6cfae'},1),
+  heart:sprite(HEART,{p:'#ff7a9c'},1),
+  camel1:sprite(CAMEL1,{c:'#6b3f22'},1), camel2:sprite(CAMEL2,{c:'#6b3f22'},1),
+};
+
+/* ---------- hero bits ---------- */
+(() => {
+  const c=$('#heroMoon').getContext('2d');
+  disc(c,12,12,10,'#fff2c2'); disc(c,16,9,9,'rgba(0,0,0,0)');
+  c.globalCompositeOperation='destination-out'; disc(c,17,9,9,'#000'); c.globalCompositeOperation='source-over';
+  R(c,6,10,1,1,'#2a1b3d');R(c,7,11,1,1,'#2a1b3d'); R(c,7,15,2,1,'#f39a9a');
+})();
+const greet = hour>=23||hour<4 ? "Kok belum tidur? Ya udah, sebentar aja ya 🌙"
+  : hour<11 ? "Pagi?? Ini cerita sebelum tidur lho. Simpan buat nanti malam ☀️"
+  : hour<15 ? "Lagi istirahat siang? Sebentar aja, nanti lanjut kerja 💙"
+  : hour<18 ? "Udah pulang kerja? Pelan-pelan aja scroll-nya."
+  : hour<21 ? "Baru beres lembur ya? Sini, duduk dulu."
+  : "Malam. Udah siap-siap tidur?";
+$('#greet').textContent=greet;
+$('#receiptDate').textContent=now.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+if(day===0 || (day===6 && hour>=19)){
+  $('#sunday').classList.add('show');
+  $('#sundayText').textContent = day===0 ? "Hari Minggu! Selamat beribadah, semoga teduh di GKPS hari ini 🕊️"
+    : "Besok Minggu. Jangan kesiangan ke GKPS ya 😄";
+  const c=$('#church').getContext('2d');
+  R(c,7,0,2,4,'#c9a227');R(c,6,1,4,1,'#c9a227');
+  for(let i=0;i<5;i++)R(c,8-i-1,4+i,2+i*2,1,'#8e1b1b');
+  R(c,3,9,10,7,'#fffaf0');R(c,7,12,2,4,'#6b4a3a');R(c,4,10,2,2,'#7fb8e6');R(c,10,10,2,2,'#7fb8e6');
+}
+
+/* ---------- ulos / hiou divider ---------- */
+(() => {
+  const cv=document.createElement('canvas');cv.width=24;cv.height=12;const c=cv.getContext('2d');
+  const K='#141414',Rd='#8e1b1b',W='#efe6d6',G='#c9a227';
+  for(let x=0;x<24;x++)for(let y=0;y<12;y++){
+    let col;
+    if(y===0||y===11)col=K; else if(y===1||y===10)col=W; else if(y===2||y===9)col=Rd;
+    else{const dx=Math.abs((x%8)-3.5),dy=Math.abs(y-5.5),d=dx+dy;col=d<1.5?G:d<2.6?W:d<3.6?K:Rd;}
+    c.fillStyle=col;c.fillRect(x,y,1,1);
+  }
+  const url=cv.toDataURL();
+  const greets=["Horas! 🙌","Horas banta haganupan! 💛","Mauliate! 🤍","Diatei tupa! 🥹","Horas, horas, horas!"];
+  let gi=0;
+  document.querySelectorAll('.ulos').forEach(el=>{
+    el.style.backgroundImage=`url(${url})`;
+    el.addEventListener('click',()=>{toast(greets[gi++%greets.length]);});
+  });
+})();
+
+/* ---------- scenes ---------- */
+const scenes=[];
+function scene(id,draw,onTap){
+  const cv=document.getElementById(id); if(!cv) return;
+  const s={cv,c:cv.getContext('2d'),W:cv.width,H:cv.height,draw,visible:false,state:{}};
+  if(onTap) cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect();onTap(s,(e.clientX-r.left)/r.width*s.W,(e.clientY-r.top)/r.height*s.H);});
+  scenes.push(s); return s;
+}
+
+/* Bab 1: kantor */
+const officeLines=[
+  "Halo, selamat sore, ada yang bisa saya bantu? 😊",
+  "Baik, mohon ditunggu sebentar ya…",
+  "Terima kasih sudah menunggu! 💙",
+  "Ada lagi yang bisa dibantu? …nggak ada? Yes, pulang! 🏃‍♀️",
+  "(kalau kamu yang nelepon, aku jawab sambil senyum lho)"
+];
+let officeIdx=0;
+scene('sOffice',(s,t)=>{
+  const c=s.c;
+  R(c,0,0,160,72,'#f0d2a8');
+  for(let x=0;x<160;x+=8)R(c,x,0,1,72,'#ecca9d');
+  R(c,0,72,160,28,'#9b6b4b'); for(let y=76;y<100;y+=6)R(c,0,y,160,1,'#8a5d40');
+  // jendela sunset
+  R(c,8,8,56,42,'#7a5440');
+  c.save();c.beginPath();c.rect(10,10,52,38);c.clip();
+  vgrad(c,10,10,52,38,['#ffd690','#ffad6e','#ff8a72','#d9677f'],7);
+  disc(c,36,40,8,'#fff1b0');
+  const bh=[14,20,10,24,16,12,22,9,18];let bx=10;
+  bh.forEach((h,i)=>{R(c,bx,48-h,6,h,'#8c4a6a');if(i%2)R(c,bx+2,48-h+3,1,1,'#ffd690');bx+=6;});
+  const bird=Math.floor(t*12)%60; R(c,14+bird,18,2,1,'#5a3a4a');R(c,13+bird,17,1,1,'#5a3a4a');R(c,16+bird,17,1,1,'#5a3a4a');
+  c.restore();
+  R(c,35,10,2,38,'#7a5440');R(c,10,28,52,2,'#7a5440');R(c,5,49,62,3,'#8a6048');
+  // jam dinding 17:00
+  disc(c,134,20,8,'#5a3d30');disc(c,134,20,7,'#fffaf0');
+  R(c,134,14,1,6,'#333');R(c,135,21,1,1,'#333');R(c,136,22,1,1,'#333');R(c,137,23,1,1,'#333');R(c,134,20,1,1,'#c0392b');
+  // piagam
+  R(c,76,12,28,20,'#c9a227');R(c,78,14,24,16,'#fffaf0');
+  R(c,89,17,2,2,'#f2c14e');R(c,88,18,4,1,'#f2c14e');R(c,82,23,16,1,'#bbb');R(c,84,26,12,1,'#bbb');
+  // orang
+  const blink=(t%3.6)<0.13, bob=Math.sin(t*2.2)>0.6?1:0;
+  c.drawImage(blink?SP.girlBlink:SP.girl,62,24+bob);
+  // hati yang naik dari headset
+  for(let k=0;k<3;k++){const p=((t*0.45+k/3)%1);c.globalAlpha=1-p;c.drawImage(SP.heart,58-k*3+Math.sin(p*9+k)*3,30-p*26);}
+  c.globalAlpha=1;
+  // meja
+  R(c,36,60,116,6,'#6b4634');R(c,36,66,116,2,'#4f3326');R(c,40,68,4,26,'#4f3326');R(c,144,68,4,26,'#4f3326');
+  // monitor + gelombang suara
+  R(c,118,54,6,6,'#2d2f3a');R(c,104,32,34,23,'#2d2f3a');R(c,106,34,30,19,'#d7eeff');R(c,106,34,30,3,'#2453a8');
+  const talk=Math.sin(t*0.9)>-0.2;
+  for(let x=0;x<26;x++){const h=Math.round((Math.sin(t*7+x*0.8)*0.5+0.5)*(talk?8:1))+1;R(c,108+x,45-Math.floor(h/2),1,h,'#2c7be5');}
+  R(c,98,58,22,2,'#d9d9e0');
+  // tanaman + mug
+  R(c,42,52,9,8,'#c1693c');R(c,41,51,11,2,'#a85a33');
+  [[46,44],[44,46],[48,46],[43,48],[49,48],[46,47],[45,42],[47,42]].forEach(([x,y])=>R(c,x,y,2,2,'#4c9a5b'));
+  R(c,88,53,6,7,'#fffaf0');R(c,94,55,2,3,'#fffaf0');R(c,89,54,4,1,'#f39a9a');
+  for(let k=0;k<3;k++){const p=(t*0.6+k/3)%1;c.globalAlpha=0.6*(1-p);R(c,90+Math.sin(p*8+k)*1.5,51-p*10,1,2,'#ffffff');}
+  c.globalAlpha=1;
+},(s,x,y)=>{
+  if(x>58&&x<100&&y>20&&y<64){
+    const b=$('#officeBubble');b.textContent=officeLines[officeIdx++%officeLines.length];
+    b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),250);
+  }
+});
+
+/* Bab 2: kamar + bulan */
+const lateNight = hour>=23||hour<4;
+const moonLines=[
+  lateNight ? "Eh, jam segini kok belum tidur? Besok kerja lho 😤 …ya udah, ngobrol bentar." : "Hai. Capek ya, senyum seharian walau nggak kelihatan di telepon?",
+  "Nasabah tadi mungkin lupa bilang makasih. Aku wakilin ya: makasih.",
+  "Tahu nggak? Suara yang sabar itu langka. Kamu punya.",
+  "Cepat, ada bintang jatuh! Bikin permohonan 🌠",
+  "Aku bulan. Tugasku nemenin orang yang belum bisa tidur. Malam ini giliran kamu.",
+  "Ssst, ada yang nitip salam. Katanya kamu jangan begadang."
+];
+let moonIdx=0, moonTapT=-9, shootT=-9;
+const roomStars=(()=>{const r=rnd(7);return Array.from({length:22},()=>[16+r()*60,10+r()*46,r()*6]);})();
+const sRoom=scene('sRoom',(s,t)=>{
+  const c=s.c;
+  R(c,0,0,160,100,'#2a2c55');
+  for(let x=4;x<160;x+=10)for(let y=4;y<80;y+=10)R(c,x,y,1,1,'#33366a');
+  // jendela
+  R(c,14,8,64,50,'#4a3a5a');
+  c.save();c.beginPath();c.rect(16,10,60,46);c.clip();
+  vgrad(c,16,10,60,46,['#0f1333','#1d2457','#2c3474'],6);
+  roomStars.forEach(([x,y,ph])=>{if(Math.sin(t*2+ph)>-0.3)R(c,x,y,1,1,'#fff7d0');});
+  // bintang jatuh
+  const sp=(t-shootT)/1.2; if(sp>=0&&sp<1){for(let k=0;k<8;k++){c.globalAlpha=(1-k/8)*(1-sp);R(c,70-sp*50+k*2,14+sp*20-k,1,1,'#fff');}c.globalAlpha=1;}
+  const shake=(t-moonTapT)<0.4?Math.round(Math.sin((t-moonTapT)*60)):0;
+  const mx=48+shake,my=30;
+  disc(c,mx,my,13,'rgba(255,242,194,0.12)');
+  disc(c,mx,my,10,'#fff2c2');R(c,mx-5,my-6,3,2,'#ecd9a0');R(c,mx+4,my+4,3,2,'#ecd9a0');R(c,mx+5,my-4,2,2,'#ecd9a0');
+  const talking=(t-moonTapT)<2.2&&Math.floor(t*6)%2===0;
+  R(c,mx-5,my-1,2,1,'#5a4a3a');R(c,mx+3,my-1,2,1,'#5a4a3a');
+  R(c,mx-6,my+1,2,1,'#f6b0a0');R(c,mx+4,my+1,2,1,'#f6b0a0');
+  if(talking){R(c,mx-1,my+2,3,2,'#8a4a4a');}else{R(c,mx-2,my+2,1,1,'#5a4a3a');R(c,mx-1,my+3,3,1,'#5a4a3a');R(c,mx+2,my+2,1,1,'#5a4a3a');}
+  c.restore();
+  R(c,45,10,2,46,'#4a3a5a');R(c,16,32,60,2,'#4a3a5a');
+  // gorden
+  R(c,8,6,9,54,'#d9a441');R(c,11,6,1,54,'#b98a30');R(c,14,6,1,54,'#b98a30');
+  R(c,75,6,9,54,'#d9a441');R(c,78,6,1,54,'#b98a30');R(c,81,6,1,54,'#b98a30');
+  R(c,6,4,80,3,'#6b4a3a');R(c,10,58,72,3,'#5a4868');
+  // lampu tumblr
+  const cols=['#ffd36e','#ff8fab','#8fd3ff'];
+  for(let x=2;x<160;x+=9){const y=2+Math.round(Math.sin(x/160*Math.PI)*4);R(c,x,y,1,1,'#5a4a6a');
+    const on=Math.sin(t*2+x)>-0.4;c.globalAlpha=on?1:0.35;R(c,x,y+1,2,2,cols[(x/9|0)%3]);c.globalAlpha=1;}
+  // rak + peta dunia
+  R(c,134,24,24,2,'#6b4a3a');[['#c0392b',8],['#2453a8',10],['#f2c14e',7],['#4c9a5b',9],['#ff8fab',8]].forEach(([col,h],i)=>R(c,135+i*4,24-h,3,h,col));
+  R(c,134,32,24,16,'#8a6048');R(c,135,33,22,14,'#cfe8ef');
+  R(c,137,36,5,4,'#7fb07a');R(c,143,35,6,6,'#7fb07a');R(c,151,38,4,5,'#7fb07a');R(c,140,41,3,3,'#7fb07a');
+  if(Math.floor(t*2)%2)R(c,152,39,1,1,'#c0392b'); R(c,146,37,1,1,'#c0392b');
+  // lantai + karpet ulos
+  R(c,0,80,160,20,'#3a2f4a');
+  R(c,14,86,64,9,'#8e1b1b');R(c,14,86,64,1,'#141414');R(c,14,94,64,1,'#141414');
+  for(let x=16;x<76;x+=6){R(c,x,89,3,3,'#efe6d6');R(c,x+1,90,1,1,'#c9a227');}
+  // kasur
+  R(c,90,58,70,6,'#f1e6d8');R(c,140,48,18,10,'#ffffff');R(c,140,57,18,1,'#ddd');
+  const blink=(t%4.1)<0.13;
+  c.drawImage(blink?SP.homeBlink:SP.home,98,22);
+  R(c,88,62,72,18,'#e0a63a');for(let x=90;x<160;x+=7)R(c,x,62,2,18,'#c98e2a');R(c,88,70,72,2,'#a8323a');
+  R(c,88,80,72,4,'#6b4a5a');
+},(s,x,y)=>{
+  if(Math.hypot(x-48,y-30)<15){
+    const t=performance.now()/1000;moonTapT=t;
+    const line=moonLines[moonIdx%moonLines.length];
+    if(moonIdx%moonLines.length===3)shootT=t;
+    moonIdx++;
+    const b=$('#moonBubble');b.textContent="🌙 "+line;b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),250);
+  }
+});
+$('#moonBubble').textContent = lateNight ? "🌙 (bulannya kelihatan agak cemberut. tap aja)" : "🌙 (bulannya kayak lagi nunggu disapa. tap aja)";
+
+/* Bab 2b: persimpangan */
+const quiz={answered:0,yes:0};
+const crossStars=(()=>{const r=rnd(3);return Array.from({length:30},()=>[r()*160,r()*44,r()*6]);})();
+scene('sCross',(s,t)=>{
+  const c=s.c, fog=1-quiz.answered/5*0.9, lit=quiz.answered;
+  vgrad(c,0,0,160,52,['#0d1130','#1a2050','#2a2f66'],6);
+  crossStars.forEach(([x,y,ph])=>{if(Math.sin(t*1.7+ph)>-0.2)R(c,x,y,1,1,'#fff7d0');});
+  disc(c,140,14,5,'#fff2c2');
+  // bukit
+  for(let x=0;x<160;x++){const h=Math.round(46+Math.sin(x/18)*3+Math.sin(x/7)*1);R(c,x,h,1,100-h,'#1f3b3a');}
+  R(c,0,58,160,42,'#24453f');
+  // jalan
+  for(let y=70;y<100;y++){const w=10+(y-70)*0.8;R(c,80-w/2,y,w,1,'#c9b48a');}
+  for(let i=0;i<44;i++){R(c,80-i*1.15-4,70-i*0.5,8,2,'#c9b48a');R(c,80+i*1.15-4,70-i*0.5,8,2,'#b7a684');}
+  // rumah terang di kiri
+  for(let i=0;i<6;i++)R(c,22-i,38+i,10+i*2,1,'#4a2e2e');
+  R(c,18,44,18,10,'#6b4a3a');
+  disc(c,26,48,5,`rgba(255,211,110,${0.08+lit*0.05})`);
+  R(c,24,47,4,4,lit>=5?'#ffe28a':'#ffd36e');R(c,30,49,3,5,'#3a2a2a');
+  // lentera
+  [[10,0],[20,1],[30,2],[38,3],[44,4]].forEach(([i,n])=>{const x=80-i*1.15-8,y=70-i*0.5;R(c,x,y-10,1,10,'#3a2a1a');
+    if(n<lit){const fl=0.18+Math.sin(t*5+n)*0.05;disc(c,x,y-12,5,`rgba(255,207,110,${fl})`);R(c,x-1,y-13,3,3,'#ffcf6e');}
+    else R(c,x-1,y-13,3,3,'#4a4a5a');});
+  // tanda tanya di kanan
+  R(c,134,40,1,10,'#5a4a3a');R(c,129,34,11,7,'#8a7a6a');
+  R(c,133,35,3,1,'#fff');R(c,135,36,1,1,'#fff');R(c,134,37,1,1,'#fff');R(c,134,39,1,1,'#fff');
+  // kunang-kunang
+  for(let k=0;k<7;k++){const x=80+Math.sin(t*0.6+k*1.7)*70,y=64+Math.cos(t*0.8+k*2.3)*12;if(Math.sin(t*3+k)>0)R(c,x,y,1,1,'#f6ff9a');}
+  // dia
+  c.drawImage(SP.back,73,76);
+  // kabut
+  c.globalAlpha=Math.max(0,fog)*0.55;
+  for(let k=0;k<16;k++){const x=((k*41+t*(3+k%3*2))%220)-30,y=30+(k*17)%60;R(c,x,y,34,6,'#d8dcf0');R(c,x+5,y-3,22,3,'#d8dcf0');}
+  c.globalAlpha=Math.max(0,fog)*0.4;
+  for(let k=0;k<9;k++){const x=96+((k*23+t*(2+k%2))%70)-6,y=28+(k*11)%34;R(c,x,y,26,5,'#d8dcf0');R(c,x+4,y-2,16,2,'#d8dcf0');}
+  c.globalAlpha=1;
+});
+
+const QS=[
+  "Kalau kamu cerita hal kecil yang nggak penting, dia dengerin sampai habis?",
+  "Kamu tahu kalian ini sebenarnya apa, tanpa harus nebak-nebak?",
+  "Habis ngobrol sama dia, kamu jadi lebih tenang, bukan makin overthinking?",
+  "Dia ada juga di hari-hari biasa, bukan cuma pas dia lagi butuh?",
+  "Kalau sahabatmu ada di posisimu sekarang, kamu bakal bilang ke dia: \"gas\"?"
+];
+function renderQ(){
+  $('#qText').textContent=QS[quiz.answered]||"";
+  $('#qDots').innerHTML=QS.map((_,i)=>`<i class="${i<quiz.answered?'on':''}"></i>`).join('');
+}
+function showResult(){
+  const y=quiz.yes; let h;
+  if(y>=4) h=`<p><b>Lenteranya nyala semua.</b></p><p>Kayaknya hatimu udah tahu jawabannya dari tadi, tinggal berani aja. Pelan-pelan juga nggak apa-apa. Yang baik nggak akan buru-buru pergi.</p>`;
+  else if(y>=2) h=`<p><b>Kabutnya masih setengah.</b></p><p>Wajar kok. Kamu boleh minta kejelasan. Itu bukan menuntut, itu cara kamu menghargai diri sendiri. Lihat jawabannya nanti, dari sikapnya, bukan dari kata-katanya.</p>`;
+  else h=`<p><b>Kabutnya tebal, ya.</b></p><p>Kalau sesuatu bikin kamu terus nebak-nebak, mungkin itu bukan rumah. Kamu pantas dapat yang jelas. Yang bikin tenang, bukan yang bikin begadang.</p>`;
+  h+=`<p>Apa pun yang kamu pilih, kamu tetap orang yang gampang banget disayang. Itu nggak berubah.</p><p style="color:var(--muted);font-size:14px">Dan nggak harus diputuskan malam ini. Hati juga butuh tidur.</p><button class="again" id="again">jawab ulang</button>`;
+  const r=$('#qResult');r.innerHTML=h;r.classList.add('show');$('#quiz').style.display='none';
+  $('#again').onclick=()=>{quiz.answered=0;quiz.yes=0;r.classList.remove('show');$('#quiz').style.display='';renderQ();};
+}
+document.querySelectorAll('#quiz .qbtns button').forEach(b=>b.addEventListener('click',()=>{
+  if(quiz.answered>=QS.length)return;
+  quiz.yes+= +b.dataset.a; quiz.answered++;
+  if(quiz.answered>=QS.length){renderQ();setTimeout(showResult,500);} else renderQ();
+}));
+renderQ();
+
+/* Bab 3: perjalanan */
+scene('sBali',(s,t)=>{
+  const c=s.c;
+  vgrad(c,0,0,160,60,['#ffd08a','#ffa36b','#f0727a','#a34f7a'],8);
+  disc(c,112,58,13,'#fff0b0');
+  R(c,0,60,160,30,'#3b4f8f');
+  for(let y=62;y<90;y+=3){const w=Math.max(2,22-(y-62)*0.5),off=Math.sin(t*2+y)*2;R(c,112-w/2+off,y,w,1,'#ffc58a');}
+  for(let k=0;k<10;k++){const x=(k*23+t*6)%170-5,y=64+(k*7)%24;R(c,x,y,4,1,'#5466a8');}
+  // candi bentar
+  const D='#2a1a2e';
+  [[14,0],[42,1]].forEach(([x0,m])=>{R(c,x0,56,16,6,D);R(c,x0+(m?0:2),48,14,8,D);R(c,x0+(m?0:4),40,12,8,D);R(c,x0+(m?0:6),33,10,7,D);R(c,x0+(m?1:8),28,7,5,D);R(c,x0+(m?2:10),24,4,4,D);});
+  R(c,10,62,52,3,D);R(c,6,65,62,25,'#2a1a2e');
+  c.drawImage(SP.shadowGirl,61,54);R(c,65,58,2,3,'#2a1a2e');
+  for(let k=0;k<3;k++){const x=(t*8+k*30)%180-10,y=20+k*6+Math.sin(t*3+k)*2,f=Math.floor(t*4+k)%2;R(c,x,y,1,1,D);R(c,x+1,y+(f?1:0),1,1,D);R(c,x+2,y,1,1,D);R(c,x-1,y+(f?0:-1),1,1,D);R(c,x+3,y+(f?0:-1),1,1,D);}
+});
+const leaves=(()=>{const r=rnd(11);return Array.from({length:12},()=>[r()*160,r()*70,r()*6,r()<0.5?'#e8743b':'#d9482b']);})();
+scene('sFiji',(s,t)=>{
+  const c=s.c;
+  vgrad(c,0,0,160,56,['#56bdf0','#8fd6f6','#c8eefc'],6);
+  disc(c,134,14,7,'#fff6c8');
+  [[20,14],[70,8],[110,22]].forEach(([x,y],i)=>{const dx=(x+t*2*(i+1))%190-20;R(c,dx,y,18,4,'#fff');R(c,dx+4,y-3,10,3,'#fff');});
+  R(c,0,56,160,16,'#2ec4c6');R(c,0,56,160,2,'#1aa3b8');
+  for(let k=0;k<12;k++){const x=(k*17+t*5)%170-5,y=59+(k*5)%10;R(c,x,y,5,1,'#7fe3e0');}
+  for(let x=0;x<160;x+=2){const y=71+Math.round(Math.sin(x/8+t*2));R(c,x,y,2,2,'#ffffff');}
+  R(c,0,72,160,18,'#f5deb3');for(let k=0;k<20;k++)R(c,(k*37)%160,76+(k*11)%14,1,1,'#e2c48f');
+  // pohon kelapa
+  const sway=Math.sin(t*1.2)*1.5;
+  for(let i=0;i<46;i++){const p=i/46;R(c,40+Math.sin(p*1.6)*14+p*sway,76-i,3,1,i%4?'#8a5a3a':'#6f4528');}
+  const tx=40+Math.sin(1.6)*14+sway, ty=30;
+  for(let a=0;a<7;a++){const ang=-Math.PI+a*Math.PI/6+Math.sin(t*1.5+a)*0.08;
+    for(let r=0;r<18;r++){const x=tx+1+Math.cos(ang)*r,y=ty+Math.sin(ang)*r*0.6+r*r*0.025;R(c,x,y,2,2,r%3?'#3fae5a':'#2f8a47');}}
+  R(c,tx,ty+1,3,3,'#7a4a2a');R(c,tx+2,ty+2,3,3,'#6a3f22');
+  // daun "gugur"
+  leaves.forEach(([x,y,ph,col])=>{const yy=(y+t*7)%70,xx=x+Math.sin(t*1.5+ph)*5;R(c,xx,yy,2,1,col);R(c,xx+1,yy+1,1,1,col);});
+  // kembang sepatu
+  R(c,118,78,2,2,'#e2304a');R(c,116,79,2,2,'#e2304a');R(c,120,79,2,2,'#e2304a');R(c,118,80,2,2,'#e2304a');R(c,118,79,2,2,'#f2c14e');
+  c.drawImage(SP.homeGirl,96,66);
+});
+const flakes=(()=>{const r=rnd(5);return Array.from({length:70},()=>[r()*160,r()*90,r()*6,r()<0.3?2:1]);})();
+scene('sSnow',(s,t)=>{
+  const c=s.c;
+  vgrad(c,0,0,160,60,['#8faed6','#b9cde6','#e1eaf5'],6);
+  const mtn=(cx,base,h,col,cap)=>{for(let y=0;y<h;y++){const w=y*1.4;R(c,cx-w,base-h+y,w*2+1,1,y<h*0.3?cap:col);}};
+  mtn(40,58,34,'#9fb2cf','#ffffff');mtn(100,58,44,'#8ea3c4','#ffffff');mtn(145,58,28,'#a9bbd6','#ffffff');
+  R(c,0,58,160,32,'#f4f7fb');for(let x=0;x<160;x+=1){const y=60+Math.round(Math.sin(x/14)*2);R(c,x,y,1,2,'#dfe8f3');}
+  const pine=(x,y,h)=>{for(let i=0;i<h;i++){const w=Math.floor(i/2)+1;R(c,x-w,y+i,w*2+1,1,i%4===0?'#ffffff':'#2f5d50');}R(c,x,y+h,1,3,'#5a3a2a');};
+  pine(14,46,18);pine(26,52,14);pine(140,48,18);pine(152,54,12);
+  // kabin
+  R(c,58,58,32,16,'#7a4b33');for(let y=60;y<74;y+=3)R(c,58,y,32,1,'#6a3f2a');
+  for(let i=0;i<10;i++)R(c,56+i,57-i,36-i*2,1,i<3?'#ffffff':'#5a3a2a');
+  R(c,56,57,36,2,'#ffffff');R(c,80,44,4,8,'#5a4a4a');R(c,80,44,4,1,'#ffffff');
+  const glow=0.8+Math.sin(t*3)*0.2;c.globalAlpha=glow;R(c,63,62,6,5,'#ffd36e');R(c,77,62,6,5,'#ffd36e');c.globalAlpha=1;
+  R(c,66,62,1,5,'#7a4b33');R(c,80,62,1,5,'#7a4b33');R(c,71,65,5,9,'#4a2e1e');
+  for(let k=0;k<4;k++){const p=(t*0.35+k/4)%1;c.globalAlpha=0.5*(1-p);R(c,81+Math.sin(p*6+k)*3,42-p*22,3,2,'#ffffff');}c.globalAlpha=1;
+  c.drawImage(SP.coat,104,66);
+  const breath=(t%2)<0.8; if(breath){c.globalAlpha=0.6;R(c,111,66,2,1,'#ffffff');R(c,113,65,1,1,'#ffffff');c.globalAlpha=1;}
+  flakes.forEach(([x,y,ph,sz])=>{const yy=(y+t*(8+sz*4))%90,xx=(x+Math.sin(t+ph)*4+160)%160;R(c,xx,yy,sz,sz,'#ffffff');});
+});
+scene('sEgypt',(s,t)=>{
+  const c=s.c;
+  vgrad(c,0,0,160,72,['#ffe2a8','#ffc57a','#ff9f62'],6);
+  disc(c,124,26,15,'rgba(255,244,194,0.35)');disc(c,124,26,11,'#fff4c2');
+  const pyr=(cx,base,h)=>{for(let y=0;y<h;y++){const w=Math.round(y*1.25);R(c,cx-w,base-h+y,w,1,'#e3a95e');R(c,cx,base-h+y,w+1,1,'#b97a3c');if(y%4===3){R(c,cx-w,base-h+y,w*2+1,1,'rgba(0,0,0,0.06)');}}};
+  pyr(52,66,32);pyr(86,68,24);pyr(108,70,14);
+  for(let x=0;x<160;x++){const y1=Math.round(64+Math.sin(x/20)*3);R(c,x,y1,1,90-y1,'#e2b46b');}
+  for(let x=0;x<160;x++){const y2=Math.round(74+Math.sin(x/16+2)*3);R(c,x,y2,1,90-y2,'#d39b4f');}
+  const cx=((t*7)%200)-20, cy=Math.round(66+Math.sin(cx/20)*3)-6;
+  c.drawImage(Math.floor(t*3)%2?SP.camel1:SP.camel2,cx,cy);
+  c.drawImage(SP.homeGirl,30,73);
+  for(let k=0;k<3;k++){const x=(k*60+t*4)%180-10;c.globalAlpha=0.25;R(c,x,40+k*5,20,1,'#ffffff');c.globalAlpha=1;}
+});
+scene('sToba',(s,t)=>{
+  const c=s.c;
+  // kampung di perbukitan: pagi berkabut
+  vgrad(c,0,0,160,50,['#a9d8f2','#d3ecf6','#ffe6c0','#ffd2a8'],7);
+  disc(c,128,30,7,'#fff1c4');
+  [[10,10],[90,6]].forEach(([x,y],i)=>{const dx=(x+t*1.5*(i+1))%190-20;R(c,dx,y,16,3,'#ffffff');R(c,dx+3,y-2,9,2,'#ffffff');});
+  // bukit di seberang danau
+  for(let x=0;x<160;x++){const h=Math.round(26+Math.sin(x/20)*5+Math.sin(x/7)*2);R(c,x,h,1,40-h,'#8fb39a');}
+  for(let x=0;x<160;x++){const h=Math.round(34+Math.sin(x/13+2)*3);R(c,x,h,1,40-h,'#79a487');}
+  // Danau Toba, persis di samping kampung
+  R(c,0,40,160,22,'#3a7bbf');R(c,0,40,160,1,'#5b95cc');
+  for(let y=42;y<62;y+=3){const w=Math.max(2,14-(y-42)*0.6),off=Math.sin(t*2+y)*2;R(c,128-w/2+off,y,w,1,'#ffe6b0');}
+  for(let k=0;k<14;k++){const x=(k*13+t*3)%170-5,y=43+(k*5)%17;if(Math.sin(t*2+k)>0)R(c,x,y,3,1,'#8fc3ef');}
+  const bx=((t*4)%200)-20;R(c,bx,50,10,2,'#5a3a28');R(c,bx+4,47,1,3,'#5a3a28');R(c,bx+5,47,2,1,'#c0392b');
+  // tepi danau + ladang bertingkat
+  for(let x=0;x<160;x++){const y=Math.round(58+Math.sin(x/11)*2+(x<60?-(60-x)*0.06:0));R(c,x,y,1,90-y,'#5d9a5c');R(c,x,y,1,1,'#f2e3c6');}
+  for(let y=66;y<90;y++){const band=Math.floor((y-66)/5);if(band%2)R(c,0,y,160,1,'#4f8a52');}
+  for(let k=0;k<40;k++)R(c,(k*37)%160,64+(k*11)%26,1,1,'#3f7a44');
+  // gereja kecil (GKPS)
+  const G=26,B=72;
+  R(c,G,B-16,22,16,'#fffaf0');R(c,G,B-16,22,1,'#e6dccb');
+  for(let i=0;i<8;i++)R(c,G-2+i,B-17-i,26-i*2,1,'#8e1b1b');
+  R(c,G+7,B-34,8,10,'#fffaf0');for(let i=0;i<5;i++)R(c,G+7+i,B-35-i,8-i*2,1,'#8e1b1b');
+  R(c,G+10,B-46,2,6,'#c9a227');R(c,G+8,B-44,6,2,'#c9a227');
+  R(c,G+9,B-31,4,4,'#c9a227');
+  R(c,G+9,B-8,4,8,'#6b4a3a');R(c,G+3,B-12,3,4,'#7fb8e6');R(c,G+16,B-12,3,4,'#7fb8e6');
+  // lonceng berayun pelan
+  if(Math.sin(t*2)>0.7){R(c,G+5,B-31,2,1,'#c9a227');R(c,G+15,B-31,2,1,'#c9a227');}
+  // rumah-rumah
+  const house=(x,y,w,wall,roof)=>{R(c,x,y,w,9,wall);for(let i=0;i<5;i++)R(c,x-1+i,y-1-i,w+2-i*2,1,roof);R(c,x+w/2-1,y+4,3,5,'#4a2e1e');};
+  house(66,66,16,'#d9c7a8','#6b4a3a');house(126,64,18,'#e6d6b8','#5a4a4a');
+  R(c,135,67,3,3,'#ffd36e');
+  // asap dapur
+  for(let k=0;k<3;k++){const p=(t*0.3+k/3)%1;c.globalAlpha=0.45*(1-p);R(c,140+Math.sin(p*6+k)*2,56-p*18,3,2,'#ffffff');}c.globalAlpha=1;
+  // kabut pagi di atas danau
+  c.globalAlpha=0.3;for(let k=0;k<6;k++){const x=((k*47+t*3)%220)-30;R(c,x,36+(k*7)%14,40,2,'#ffffff');}c.globalAlpha=1;
+  // jalan setapak + pulang bawa koper
+  for(let y=70;y<90;y++){const w=4+(y-70)*0.6;R(c,92-w/2+(y-70)*0.8,y,w,1,'#c9a77a');}
+  c.drawImage(SP.homeGirl,104,76);R(c,111,82,4,5,'#c0392b');R(c,112,81,2,1,'#5a3a28');
+});
+
+/* Bab 4: tidur */
+const sleepStars=(()=>{const r=rnd(19);return Array.from({length:18},()=>[12+r()*52,10+r()*36,r()*6]);})();
+scene('sSleep',(s,t)=>{
+  const c=s.c;
+  R(c,0,0,160,100,'#151733');
+  R(c,10,8,56,42,'#2a2850');
+  c.save();c.beginPath();c.rect(12,10,52,38);c.clip();
+  vgrad(c,12,10,52,38,['#090b22','#141a44'],4);
+  sleepStars.forEach(([x,y,ph])=>{if(Math.sin(t*1.3+ph)>-0.2)R(c,x,y,1,1,'#fff7d0');});
+  for(let y=-8;y<=8;y++)for(let x=-8;x<=8;x++){if(x*x+y*y<=64&&(x-4)*(x-4)+(y+3)*(y+3)>56)R(c,46+x,24+y,1,1,'#fff2c2');}
+  R(c,40,24,2,1,'#6a5a4a');
+  c.restore();
+  R(c,37,10,2,38,'#2a2850');R(c,12,28,52,2,'#2a2850');
+  for(let x=2;x<160;x+=9){const y=2+Math.round(Math.sin(x/160*Math.PI)*4);c.globalAlpha=0.35+0.25*Math.sin(t*0.8+x);R(c,x,y+1,2,2,['#ffd36e','#ff8fab','#8fd3ff'][(x/9|0)%3]);}
+  c.globalAlpha=1;
+  // meja kecil + hp
+  R(c,8,64,26,22,'#3a2f4a');R(c,8,64,26,2,'#4a3d5c');R(c,16,61,10,3,'#111');
+  const glow=(t%6)<3; if(glow){R(c,17,61,8,2,'#7fb8e6');disc(c,21,58,6,'rgba(127,184,230,0.12)');}
+  // kasur
+  R(c,40,66,118,10,'#4a3d5c');R(c,40,60,118,6,'#d8d0e8');
+  R(c,116,48,36,13,'#e9e4f5');R(c,116,60,36,1,'#cfc6e0');
+  const breathe=Math.sin(t*1.4)>0?0:1;
+  c.drawImage(SP.sleep,120,43+breathe);
+  R(c,40,58+breathe,84,20,'#d39a35');for(let x=42;x<124;x+=7)R(c,x,58+breathe,2,20,'#b98128');R(c,40,66+breathe,84,2,'#8e1b1b');
+  R(c,118,57+breathe,10,6,'#d39a35');
+  R(c,0,86,160,14,'#1e1a36');
+  // Zzz
+  for(let k=0;k<3;k++){const p=(t*0.35+k/3)%1,x=142+p*10+Math.sin(p*6)*2,y=42-p*24,sz=1+Math.floor(p*2);
+    c.globalAlpha=1-p;R(c,x,y,3*sz,sz,'#cfc6e6');R(c,x+sz,y+sz,sz,sz,'#cfc6e6');R(c,x,y+2*sz,3*sz,sz,'#cfc6e6');}
+  c.globalAlpha=1;
+});
+
+/* Rasi bintang */
+const LET={
+  B:[[[0,0],[0,1]],[[0,0],[.55,0],[.75,.12],[.75,.36],[.55,.5],[0,.5]],[[.55,.5],[.8,.64],[.8,.88],[.6,1],[0,1]]],
+  O:[Array.from({length:13},(_,i)=>{const a=i/12*Math.PI*2-Math.PI/2;return[.4+Math.cos(a)*.4,.5+Math.sin(a)*.5];})],
+  R:[[[0,1],[0,0],[.55,0],[.75,.12],[.75,.38],[.55,.5],[0,.5]],[[.4,.5],[.8,1]]],
+  A:[[[0,1],[.4,0],[.8,1]],[[.18,.58],[.62,.58]]]
+};
+const segs=[];
+"BORA".split('').forEach((L,i)=>{const ox=22+i*44,oy=12,sx=36,sy=46;
+  LET[L].forEach(stroke=>{for(let k=0;k<stroke.length-1;k++){const a=stroke[k],b=stroke[k+1];segs.push([ox+a[0]*sx,oy+a[1]*sy,ox+b[0]*sx,oy+b[1]*sy]);}});});
+const bgStars=(()=>{const r=rnd(23);return Array.from({length:40},()=>[r()*200,r()*72,r()*6]);})();
+let constP=0;
+const sConst=scene('sConst',(s,t)=>{
+  const c=s.c;c.clearRect(0,0,200,72);
+  bgStars.forEach(([x,y,ph])=>{c.globalAlpha=0.25+0.25*Math.sin(t*1.5+ph);R(c,x,y,1,1,'#ffffff');});c.globalAlpha=1;
+  const n=constP*segs.length;
+  for(let i=0;i<segs.length;i++){
+    if(i>=n)break; const f=Math.min(1,n-i), [x1,y1,x2,y2]=segs[i];
+    const ex=x1+(x2-x1)*f, ey=y1+(y2-y1)*f, len=Math.hypot(ex-x1,ey-y1);
+    c.globalAlpha=0.45;for(let d=0;d<=len;d+=1)R(c,x1+(ex-x1)*d/(len||1),y1+(ey-y1)*d/(len||1),1,1,'#cfd8ff');c.globalAlpha=1;
+  }
+  const pts=new Set();for(let i=0;i<Math.ceil(n)&&i<segs.length;i++){pts.add(segs[i][0]+','+segs[i][1]);if(i<n-1||n>=segs.length)pts.add(segs[i][2]+','+segs[i][3]);}
+  let j=0;pts.forEach(p=>{const[x,y]=p.split(',').map(Number),tw=Math.sin(t*3+j++)>0;R(c,x-1,y,3,1,'#fff7d0');R(c,x,y-1,1,3,'#fff7d0');if(tw){c.globalAlpha=0.5;R(c,x-2,y,5,1,'#fff7d0');R(c,x,y-2,1,5,'#fff7d0');c.globalAlpha=1;}});
+});
+
+/* ---------- loop + visibility ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{const s=scenes.find(s=>s.cv===e.target);if(s)s.visible=e.isIntersecting;}),{rootMargin:'100px'});
+scenes.forEach(s=>io.observe(s.cv));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function loop(ms){const t=ms/1000;scenes.forEach(s=>{if(s.visible){s.c.clearRect(0,0,s.W,s.H);s.draw(s,t);}});if(!reduce)requestAnimationFrame(loop);}
+scenes.forEach(s=>s.draw(s,1));
+if(!reduce)requestAnimationFrame(loop); else setInterval(()=>loop(performance.now()),1000);
+
+const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rio.unobserve(e.target);}}),{threshold:0.2});
+document.querySelectorAll('.reveal').forEach(el=>rio.observe(el));
+
+/* ---------- langit ikut scroll ---------- */
+const sky=$('#sky'),sc=sky.getContext('2d');let skyStars=[];
+function sizeSky(){const d=Math.min(2,devicePixelRatio||1);sky.width=innerWidth*d;sky.height=innerHeight*d;const r=rnd(99);
+  skyStars=Array.from({length:Math.round(innerWidth*innerHeight/6000)},()=>[r()*sky.width,r()*sky.height,r()*6,r()<0.15?2:1]);}
+sizeSky();addEventListener('resize',sizeSky);
+function drawSky(ms){const t=ms/1000,d=Math.min(2,devicePixelRatio||1);sc.clearRect(0,0,sky.width,sky.height);
+  skyStars.forEach(([x,y,ph,z])=>{sc.globalAlpha=0.35+0.45*(0.5+0.5*Math.sin(t*1.2+ph*3));sc.fillStyle='#fff7e0';sc.fillRect(x,y,z*d,z*d);});
+  if(!reduce)requestAnimationFrame(drawSky);}
+requestAnimationFrame(drawSky);
+const BG=['#f4b886','#e3909a','#8d6aa8','#3b3a7a','#1c1d45','#0d0f2c','#07081c'];
+function onScroll(){
+  const max=document.documentElement.scrollHeight-innerHeight, p=max>0?scrollY/max:0;
+  document.body.style.backgroundColor=mix(BG,p);
+  sky.style.opacity=Math.max(0,Math.min(1,(p-0.08)/0.3));
+  const pl=$('#plane'); if(pl){const rr=pl.parentElement.getBoundingClientRect(),f=Math.max(0,Math.min(1,(innerHeight*0.85-rr.top)/(innerHeight*0.7)));pl.style.left=`calc(46px + (100% - 110px) * ${f.toFixed(3)})`;}
+  const r=sConst.cv.getBoundingClientRect(); constP=Math.max(0,Math.min(1,(innerHeight*0.95-r.top)/(innerHeight*0.6)));
+}
+addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+/* ---------- tulis ke bulan ---------- */
+const replies=[
+  [/horas banta|haganupan/,"Horas banta haganupan! Simalungun mode: ON 💛"],
+  [/diatei/,"Diatei tupa juga! Bulan terharu dibilang makasih pakai bahasa Simalungun 🥹"],
+  [/mauliate/,"Mauliate godang! Sama-sama, dari bulan 🤍"],
+  [/horas/,"Horas! 🙌 (bulan lagi belajar bahasa Batak, maklumin ya)"],
+  [/\bbula\b/,"Bula! 🌺 Itu 'halo'-nya Fiji. Wah, udah latihan nih ceritanya."],
+  [/gkps|gereja|minggu/,"Sampai ketemu hari Minggu di GKPS ya. Semoga ibadahnya teduh 🕊️"],
+  [/dipasu|pasu-pasu|pasu pasu/,"Amin! Di GKPS juga ya nanti. Bulan diundang nggak? 🤭"],
+  [/utte|mukkur/,"Utte mukkur lebih ampuh dari dating app, katanya 🍋 bulan nggak ikut-ikutan ya."],
+  [/singapur|singapore/,"Pernah. Mau lagi? ENGGA. 😂 Bulan setuju, mending ke Fiji."],
+  [/krakatau|sebesi|sangiang/,"Langganan bumi premium, diperpanjang otomatis ✨"],
+  [/vietnam|thailand|malaysia/,"Cap paspornya udah kebanyakan, sampai bulan iri 🌏"],
+  [/explorer|petualang/,"Lapor, Explorer! Next trip ke mana? P info‼️ 🧭"],
+  [/lembur/,"Lembur lagi? Inget, tiketnya nggak bakal kabur. Istirahat juga ya 💙"],
+  [/bage|kampung|simalungun/,"Salam buat Bage. Bulan juga nongol di sana tiap malam kok 🌙"],
+  [/\bbora\b/,"Ssst… itu rahasia 🤫 Coba lihat lagi huruf pertama tiap bab."],
+  [/siapa|yang buat|yang bikin/,"Aku cuma bulan. Tapi iya, ada yang nitip salam 🌙"],
+  [/capek|lelah|cape/,"Sini, taruh capeknya di bulan. Besok pagi kamu ambil semangatnya aja ☁️"],
+  [/galau|bingung|ragu|hts|dia/,"Nggak harus diputuskan malam ini. Hati juga butuh tidur."],
+  [/bali/,"Yang ke Bali sendirian itu kamu kan? Keren banget, serius."],
+  [/fiji|mesir|salju|giza|piramida/,"Dicatat di paspor mimpi. Bulan ikut nunggu kabar keberangkatannya ✈️"],
+  [/halo|hai|hi\b/,"Halo, selamat malam! Dengan bulan, ada yang bisa dibantu? 😄"],
+  [/makasih|terima kasih|thanks/,"Sama-sama. Makasih juga udah mampir malam ini."],
+  [/sayang|love|cinta/,"Disampaikan. Ke siapa? Rahasia bulan 🤭"],
+  [/tidur|ngantuk|good ?night|selamat malam/,"Iya, tidur sana. Bulan jaga jendela kamu 🌙"]
+];
+function sendMoon(){
+  const v=$('#moonInput').value.trim().toLowerCase(); if(!v)return;
+  const hit=replies.find(([re])=>re.test(v));
+  $('#moonReply').textContent="🌙 "+(hit?hit[1]:"Bulan udah baca. Disimpan baik-baik, nggak dibocorin ke siapa-siapa 🤍");
+  $('#moonInput').value='';
+}
+$('#moonSend').onclick=sendMoon;
+$('#moonInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendMoon();});
+
+/* ---------- ketik "horas" di mana aja ---------- */
+let typed='';
+addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.key.length!==1)return;
+  typed=(typed+e.key.toLowerCase()).slice(-12);
+  if(typed.endsWith('horas'))toast("Horas! 🙌 Ketahuan, kamu orang Batak ya");
+  else if(typed.endsWith('bora'))toast("🤫 sssttt");
+  else if(typed.endsWith('bula'))toast("Bula! 🌺");
+});
+
+/* ---------- rahasia di footer (tahan lama) ---------- */
+(() => {
+  const sp=$('#sparkle');let tm;
+  const start=e=>{e.preventDefault();sp.classList.add('hold');tm=setTimeout(()=>{$('#secret').classList.add('show');},900);};
+  const end=()=>{sp.classList.remove('hold');clearTimeout(tm);};
+  sp.addEventListener('pointerdown',start);['pointerup','pointerleave','pointercancel'].forEach(ev=>sp.addEventListener(ev,end));
+  sp.addEventListener('contextmenu',e=>e.preventDefault());
+})();
+
+/* ---------- musik: kotak musik ---------- */
+const MEL=[76,79,84, 83,0,79, 81,79,76, 74,0,0, 76,79,81, 79,76,72, 74,76,74, 72,0,0,
+           72,76,79, 81,0,84, 83,81,79, 76,0,0, 77,76,74, 72,74,76, 74,71,74, 72,0,0];
+const BASS=[48,43,45,43,48,48,43,48, 48,41,43,48,41,48,43,48];
+const BEAT=60/66;
+let actx,bus,master,timer,nextT=0,step=0,playing=false;
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+function voice(f,time,vel,dec,partial=true){
+  const o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=f;
+  g.gain.setValueAtTime(0.0001,time);g.gain.exponentialRampToValueAtTime(vel,time+0.006);g.gain.exponentialRampToValueAtTime(0.0001,time+dec);
+  o.connect(g).connect(bus);o.start(time);o.stop(time+dec+0.05);
+  if(partial){const o2=actx.createOscillator(),g2=actx.createGain();o2.type='sine';o2.frequency.value=f*4.02;
+    g2.gain.setValueAtTime(0.0001,time);g2.gain.exponentialRampToValueAtTime(vel*0.18,time+0.004);g2.gain.exponentialRampToValueAtTime(0.0001,time+0.35);
+    o2.connect(g2).connect(bus);o2.start(time);o2.stop(time+0.4);}
+}
+function initAudio(){
+  actx=new (window.AudioContext||window.webkitAudioContext)();
+  master=actx.createGain();master.gain.value=0.0001;
+  const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3200;
+  bus=actx.createGain();bus.gain.value=1;
+  const dl=actx.createDelay(1),fb=actx.createGain(),wet=actx.createGain();dl.delayTime.value=0.42;fb.gain.value=0.3;wet.gain.value=0.32;
+  bus.connect(lp);lp.connect(master);lp.connect(dl);dl.connect(fb).connect(dl);dl.connect(wet).connect(master);
+  master.connect(actx.destination);
+}
+function tick(){
+  while(nextT<actx.currentTime+0.25){
+    const m=MEL[step];
+    if(m)voice(mtof(m),nextT,0.14,2.4);
+    if(step%3===0){const b=BASS[Math.floor(step/3)%BASS.length];voice(mtof(b),nextT,0.09,3.2,false);voice(mtof(b+7),nextT+0.02,0.04,2.6,false);}
+    nextT+=BEAT;step=(step+1)%MEL.length;
+  }
+}
+function setMusic(on){
+  if(on){
+    if(!actx)initAudio(); actx.resume();
+    nextT=actx.currentTime+0.1; clearInterval(timer); timer=setInterval(tick,60); tick();
+    master.gain.cancelScheduledValues(actx.currentTime);master.gain.setValueAtTime(Math.max(master.gain.value,0.0001),actx.currentTime);
+    master.gain.exponentialRampToValueAtTime(0.55,actx.currentTime+1.5);
+  }else if(actx){
+    master.gain.cancelScheduledValues(actx.currentTime);master.gain.setValueAtTime(Math.max(master.gain.value,0.0001),actx.currentTime);
+    master.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+0.8);
+    setTimeout(()=>{if(!playing)clearInterval(timer);},900);
+  }
+  playing=on;
+  const b=$('#music');b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);
+  b.firstChild.textContent=on?'♪ musik':'♪ musik';
+  $('#startMusic').textContent=on?'♪ musik nyala. sekarang scroll ↓':'♪ nyalakan musik dulu';
+}
+$('#music').onclick=()=>setMusic(!playing);
+$('#startMusic').onclick=()=>setMusic(!playing);
+
+/* ---------- untuk yang iseng buka console ---------- */
+console.log("%c✦ hai, yang suka ngintip console.\n%cnamanya nggak pernah ditulis di sini.\nTapi bintang-bintang di bab terakhir tahu.","font:16px monospace;color:#f2c14e","font:13px monospace;color:#9a90c0");
+})();
+</script>
+</body>
+</html>
