@@ -408,8 +408,9 @@
 
     <div class="card reveal">
       <p>Sebelum merem, mau titip sesuatu ke bulan?</p>
-      <div class="moonbox"><input id="moonInput" placeholder="tulis apa aja…" maxlength="80" autocomplete="off"><button id="moonSend">kirim</button></div>
+      <div class="moonbox"><input id="moonInput" placeholder="tulis apa aja…" maxlength="300" autocomplete="off"><button id="moonSend">kirim</button></div>
       <div class="moonreply" id="moonReply"></div>
+      <p style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5">psst, bulan suka nerusin titipan ke si pembawa lentera 🏮 jadi yang kamu tulis di sini juga sampai ke dia.</p>
     </div>
 
     <p class="reveal" style="text-align:center;color:var(--muted);margin-top:50px">Lihat ke atas sebentar.</p>
@@ -1403,10 +1404,15 @@ const replies=[
   [/tidur|ngantuk|good ?night|selamat malam/,"Iya, tidur sana. Bulan jaga jendela kamu 🌙"]
 ];
 function sendMoon(){
-  const v=$('#moonInput').value.trim().toLowerCase(); if(!v)return;
-  const hit=replies.find(([re])=>re.test(v));
-  $('#moonReply').textContent="🌙 "+(hit?hit[1]:"Bulan udah baca. Disimpan baik-baik, nggak dibocorin ke siapa-siapa 🤍");
+  const raw=$('#moonInput').value.trim(), v=raw.toLowerCase(); if(!v)return;
+  const hit=replies.find(([re])=>re.test(v)), out=$('#moonReply');
+  out.textContent="🌙 "+(hit?hit[1]:"Bulan udah baca. Makasih udah dititipin 🤍");
   $('#moonInput').value='';
+  if(!WORKER_URL)return;
+  const st=document.createElement('div');st.style.cssText='font-size:12px;font-weight:400;color:var(--muted);margin-top:4px';st.textContent='(lagi dikirim…)';out.appendChild(st);
+  const fd=new FormData();fd.append('message',raw.slice(0,500));
+  fetch(WORKER_URL,{method:'POST',body:fd}).then(r=>r.json()).then(j=>{st.textContent=j&&j.ok?'(terkirim ke si pembawa lentera ✓)':'(belum kekirim. coba kirim lagi ya)';})
+    .catch(()=>{st.textContent='(belum kekirim. coba kirim lagi ya)';});
 }
 $('#moonSend').onclick=sendMoon;
 $('#moonInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendMoon();});

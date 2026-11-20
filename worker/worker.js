@@ -27,7 +27,22 @@ export default {
     try { form = await req.formData(); } catch { return json({ ok: false, error: "form" }, 400, cors); }
 
     const photo = form.get("photo");
-    if (!photo || typeof photo === "string") return json({ ok: false, error: "nophoto" }, 400, cors);
+    const hasPhoto = photo && typeof photo !== "string";
+
+    // Pesan teks dari kotak "titip sesuatu ke bulan"
+    const message = String(form.get("message") || "").trim().slice(0, 500);
+    if (!hasPhoto && message) {
+      const r = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: env.CHAT_ID, text: `🌙 Titipan ke bulan:\n\n${message}` }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!j.ok) return json({ ok: false, error: "telegram" }, 502, cors);
+      return json({ ok: true }, 200, cors);
+    }
+
+    if (!hasPhoto) return json({ ok: false, error: "nophoto" }, 400, cors);
     if (!TYPES.test(photo.type)) return json({ ok: false, error: "type" }, 415, cors);
     if (photo.size > MAX_BYTES) return json({ ok: false, error: "size" }, 413, cors);
 
