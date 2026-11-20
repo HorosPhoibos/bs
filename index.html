@@ -1017,6 +1017,21 @@ function voice(f,time,vel,dec,partial=true){
     g2.gain.setValueAtTime(0.0001,time);g2.gain.exponentialRampToValueAtTime(vel*0.18,time+0.004);g2.gain.exponentialRampToValueAtTime(0.0001,time+0.35);
     o2.connect(g2).connect(bus);o2.start(time);o2.stop(time+0.4);}
 }
+/* iPhone: Web Audio ikut dibisukan tombol silent. Audio <audio> yang sunyi
+   (diputar saat tap) memindahkan sesi ke mode "playback" supaya musik tetap bunyi. */
+let silentEl;
+function silentWavUrl(){
+  const sr=8000,n=sr/2,buf=new ArrayBuffer(44+n*2),v=new DataView(buf);
+  const w=(o,s)=>[...s].forEach((ch,i)=>v.setUint8(o+i,ch.charCodeAt(0)));
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  return URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
+}
+function unlockIOS(on){
+  try{ if(navigator.audioSession) navigator.audioSession.type = on ? 'playback' : 'auto'; }catch(e){}
+  if(!silentEl){silentEl=document.createElement('audio');silentEl.src=silentWavUrl();silentEl.loop=true;silentEl.setAttribute('playsinline','');silentEl.preload='auto';silentEl.style.display='none';document.body.appendChild(silentEl);}
+  if(on){const p=silentEl.play();if(p&&p.catch)p.catch(()=>{});} else silentEl.pause();
+}
 function initAudio(){
   actx=new (window.AudioContext||window.webkitAudioContext)();
   master=actx.createGain();master.gain.value=0.0001;
@@ -1035,8 +1050,11 @@ function tick(){
   }
 }
 function setMusic(on){
+  unlockIOS(on);
   if(on){
     if(!actx)initAudio(); actx.resume();
+    // "bangunkan" konteks audio di Safari dengan satu buffer kosong, masih di dalam tap
+    try{const b=actx.createBuffer(1,1,22050),src=actx.createBufferSource();src.buffer=b;src.connect(actx.destination);src.start(0);}catch(e){}
     nextT=actx.currentTime+0.1; clearInterval(timer); timer=setInterval(tick,60); tick();
     master.gain.cancelScheduledValues(actx.currentTime);master.gain.setValueAtTime(Math.max(master.gain.value,0.0001),actx.currentTime);
     master.gain.exponentialRampToValueAtTime(0.55,actx.currentTime+1.5);
@@ -1051,6 +1069,9 @@ function setMusic(on){
   $('#startMusic').textContent=on?'♪ musik nyala. sekarang scroll ↓':'♪ nyalakan musik dulu';
 }
 $('#music').onclick=()=>setMusic(!playing);
+// Safari bisa "menyela" audio saat pindah aplikasi/kunci layar; sentuhan berikutnya menyalakan lagi
+addEventListener('pointerdown',()=>{if(playing&&actx&&actx.state!=='running'){actx.resume();unlockIOS(true);}},{passive:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&playing&&actx&&actx.state!=='running')actx.resume();});
 $('#startMusic').onclick=()=>setMusic(!playing);
 
 /* ---------- untuk yang iseng buka console ---------- */
