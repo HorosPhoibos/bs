@@ -142,6 +142,35 @@
          max-width:calc(100% - 32px);text-align:center}
   #toast.show{transform:translate(-50%,0)}
 
+  /* amplop */
+  .envs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+  .env{position:relative;border:0;cursor:pointer;text-align:left;font:inherit;color:#2a1b3d;background:#fff4e2;border-radius:6px;
+       padding:34px 12px 12px;min-height:112px;box-shadow:0 6px 14px rgba(0,0,0,.28);overflow:hidden;transition:transform .2s}
+  .env:before{content:"";position:absolute;left:0;right:0;top:0;height:46px;background:linear-gradient(to bottom right,transparent 49.5%,#f1dcc0 50%) left/50% 100% no-repeat,
+       linear-gradient(to bottom left,transparent 49.5%,#f1dcc0 50%) right/50% 100% no-repeat;opacity:.9}
+  .env .seal{position:absolute;left:50%;top:26px;transform:translateX(-50%);width:26px;height:26px;border-radius:50%;background:#a8323a;
+       box-shadow:inset 0 -3px 0 rgba(0,0,0,.25);display:grid;place-items:center;font-size:12px}
+  .env small{display:block;font-family:"Pixelify Sans";font-size:11px;letter-spacing:1px;color:#8a6a72;margin-top:16px}
+  .env b{display:block;font-size:15px;line-height:1.3;margin-top:2px}
+  .env:active{transform:scale(.97)}
+  .env.opened{background:#e9e1d6;opacity:.8}.env.opened .seal{background:#bdb3a8}
+  .env.opened small:after{content:" · sudah dibuka"}
+  .env.locked{background:#3a3560;color:#cfc6e6;cursor:default}.env.locked:before{opacity:.15}.env.locked .seal{background:#6d6690}
+  .env.locked small{color:#a9a1c4}
+  .env.wide{grid-column:1/-1}
+  #letter{position:fixed;inset:0;z-index:30;background:rgba(6,6,24,.72);display:none;align-items:center;justify-content:center;padding:16px;
+          backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  #letter.show{display:flex}
+  #letter .paper{position:relative;background:#fffaf0;color:#2b2233;max-width:460px;width:100%;max-height:86svh;overflow:auto;border-radius:4px;
+          padding:30px 24px 26px;box-shadow:0 20px 50px rgba(0,0,0,.5);animation:unfold .5s cubic-bezier(.2,1.3,.4,1);
+          background-image:repeating-linear-gradient(transparent 0 27px,#efe2cf 27px 28px);line-height:28px;font-size:16.5px}
+  @keyframes unfold{from{transform:translateY(30px) scale(.9);opacity:0}}
+  #letter .lt-label{font-family:"Pixelify Sans";font-size:12px;letter-spacing:2px;color:#a8323a;text-transform:uppercase}
+  #letter h3{font-family:"Pixelify Sans";font-size:24px;margin:2px 0 12px;line-height:1.2}
+  #letter p{margin:0 0 14px}
+  #letter .sign{text-align:right;font-style:italic;color:#7a6a7a;margin-top:6px}
+  #letter .close{position:absolute;top:8px;right:10px;border:0;background:none;font-size:20px;cursor:pointer;color:#7a6a7a;padding:6px}
+
   @media (prefers-reduced-motion:reduce){.reveal{transition:none;opacity:1;transform:none}.scrollhint{animation:none}}
 </style>
 </head>
@@ -241,6 +270,7 @@
       <p>Oh iya, bulan hampir lupa.</p>
       <p>Kalau kamu lihat lagi gambar persimpangan tadi, di pojok kanan bawah ada yang berdiri sendirian pegang lentera. Dia nggak ngehalangin jalan siapa-siapa. Dia juga nggak minta dipilih.</p>
       <p>Dia cuma pengen jalan yang kamu pilih nanti nggak gelap. Dan kalau suatu hari kamu nengok ke pinggir, dia masih di situ. Nggak buru-buru.</p>
+      <p style="color:var(--muted);font-size:14px">Katanya dia juga suka ninggalin lentera kecil di mana-mana. Ada 7, nyempil di gambar-gambar cerita ini. Kalau ketemu, tap aja 🏮</p>
     </div>
   </section>
 
@@ -355,6 +385,29 @@
       <p>dan seseorang yang nitip salam lewat bulan.</p>
     </div>
   </section>
+
+  <div class="ulos" title="tap aku"></div>
+
+  <section class="chapter" id="amplop">
+    <div class="chap-label">Lampiran</div>
+    <h2 class="chap-title">Amplop dari Bulan</h2>
+    <div class="card reveal">
+      <p>Ada yang nitip amplop-amplop ini ke bulan. Bukan buat dibaca sekaligus.</p>
+      <p>Bukanya pas waktunya aja. Kapan pun, website ini nggak ke mana-mana.</p>
+    </div>
+    <div class="envs reveal" id="envs"></div>
+    <p class="reveal" style="text-align:center;color:var(--muted);font-size:14px;margin-top:18px">🏮 lentera ditemukan: <b id="lanternCount">0</b>/7</p>
+  </section>
+
+  <div id="letter" role="dialog" aria-modal="true" aria-labelledby="letterTitle">
+    <div class="paper">
+      <button class="close" id="letterClose" aria-label="tutup">✕</button>
+      <div class="lt-label" id="letterLabel"></div>
+      <h3 id="letterTitle"></h3>
+      <div id="letterBody"></div>
+      <div class="sign">— si pembawa lentera 🏮</div>
+    </div>
+  </div>
 
   <footer>
     <span class="sparkle" id="sparkle" aria-label="rahasia">✦</span>
@@ -995,11 +1048,102 @@ const sConst=scene('sConst',(s,t)=>{
   let j=0;pts.forEach(p=>{const[x,y]=p.split(',').map(Number),tw=Math.sin(t*3+j++)>0;R(c,x-1,y,3,1,'#fff7d0');R(c,x,y-1,1,3,'#fff7d0');if(tw){c.globalAlpha=0.5;R(c,x-2,y,5,1,'#fff7d0');R(c,x,y-2,1,5,'#fff7d0');c.globalAlpha=1;}});
 });
 
+/* ---------- lentera tersembunyi ---------- */
+const LANTERNS={sOffice:[146,57],sBali:[140,20],sFiji:[132,80],sSnow:[94,64],sEgypt:[142,76],sToba:[150,60],sSleep:[29,60]};
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+let found=new Set(store.get('st_lanterns',[]).filter(id=>LANTERNS[id]));
+function drawLantern(s,t){
+  const L=LANTERNS[s.cv.id]; if(!L)return; const c=s.c,[x,y]=L,on=found.has(s.cv.id),pul=0.5+0.5*Math.sin(t*2.2+x);
+  disc(c,x,y,on?7:4,`rgba(255,207,110,${on?0.22+pul*0.1:0.10+pul*0.10})`);
+  R(c,x-1,y-3,3,1,'#3a2a1a');R(c,x,y-4,1,1,'#3a2a1a');R(c,x-1,y-2,3,4,'#ffcf6e');R(c,x,y-1,1,2,'#fff4c2');R(c,x-1,y+2,3,1,'#3a2a1a');
+  if(on){const b=(t*0.8)%1;c.globalAlpha=1-b;R(c,x-1,y-7-b*4,1,1,'#ff7a9c');R(c,x+1,y-7-b*4,1,1,'#ff7a9c');R(c,x-1,y-6-b*4,3,1,'#ff7a9c');R(c,x,y-5-b*4,1,1,'#ff7a9c');c.globalAlpha=1;}
+}
+const lanternMsgs=["Eh, ketemu! 🏮","Teliti juga ya 🏮","Satu lagi! 🏮","Wah, jago nyari 🏮","Hampir setengah jalan… 🏮","Tinggal sedikit lagi 🏮","Semua ketemu! Ada amplop yang kebuka 💌"];
+Object.keys(LANTERNS).forEach(id=>{
+  const cv=document.getElementById(id); if(!cv)return;
+  cv.addEventListener('click',e=>{
+    const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*cv.width,y=(e.clientY-r.top)/r.height*cv.height,[lx,ly]=LANTERNS[id];
+    if(Math.hypot(x-lx,y-ly)>8||found.has(id))return;
+    found.add(id);store.set('st_lanterns',[...found]);
+    toast(`${lanternMsgs[Math.min(found.size,7)-1]}  ${found.size}/7`);renderEnvs();
+  });
+});
+
+/* ---------- amplop ---------- */
+const ENVS=[
+  {id:'sedih',label:'buka kalau',title:'lagi sedih',body:[
+    "Hai. Nggak usah pura-pura baik-baik aja dulu.",
+    "Kamu udah seharian sabar sama orang lain. Sekarang giliran kamu yang disabarin. Nangis boleh. Diem boleh. Makan mie tengah malam juga boleh, sekali ini aja.",
+    "Sedihnya nanti lewat, kayak antrean yang akhirnya habis juga. Dan selama nunggu, ingat ya: ada yang diam-diam berharap kamu senyum lagi besok. Nggak harus besok pagi. Siang juga nggak apa-apa."]},
+  {id:'sendiri',label:'buka kalau',title:'lagi ngerasa sendirian',body:[
+    "Sendirian itu bukan berarti nggak ada yang mikirin.",
+    "Kamu cuma nggak tahu aja, ada orang yang tiap lihat sesuatu yang lucu langsung kepikiran: \"dia pasti ketawa lihat ini.\" Ada yang tiap dengar lagu bagus pengen langsung ngirim ke kamu, terus nggak jadi karena takut kelihatan.",
+    "Jadi malam ini kamu nggak beneran sendirian. Kamu cuma lagi ditemenin dari jauh."]},
+  {id:'jalan',label:'buka kalau',title:'lagi jalan sendirian di tempat jauh',body:[
+    "Hei, explorer. Lagi di mana sekarang?",
+    "Pasti lagi bengong lihat pemandangan sambil mikir, \"kok aku berani ya?\" Iya, kamu berani. Dari dulu.",
+    "Pesan-pesan kecil: foto pemandangannya boleh 47 kali, tapi lihat pakai mata sendiri minimal sekali. Minum air. Simpan paspor baik-baik. Kabarin orang rumah.",
+    "Dan kalau tiba-tiba kangen rumah, lihat ke atas. Bulannya sama kok, dari Bage sampai Giza."]},
+  {id:'capek',label:'buka kalau',title:'habis dimarahin nasabah / capek lembur',body:[
+    "Orang yang marah di telepon tadi sebenarnya bukan marah sama kamu. Dia marah sama harinya. Kamu cuma kebetulan jadi orang paling sabar yang dia temui hari itu.",
+    "Sekarang teleponnya udah ditutup. Lepas headset-nya. Taruh capeknya di sini.",
+    "Kamu kerja bagus banget hari ini, walaupun nggak ada yang bilang. Jadi aku yang bilang: <b>kerja bagus.</b> Besok pakai senyum yang sama, tapi istirahat dulu malam ini."]},
+  {id:'mama',label:'buka kalau',title:'lagi kangen Mama',body:[
+    "Kangen itu tandanya sayangnya masih ada, cuma nggak tahu harus dikirim ke mana.",
+    "Coba nyanyiin satu lagu yang dulu sering Mama nyanyiin, pelan-pelan aja. Atau buka satu ayat yang dulu dia suka. Mama seorang bipo, pasti banyak ayat yang dia titipin ke kamu tanpa kamu sadar.",
+    "Kamu nggak sendirian kangen dia. Dan yang dia tanam di kamu, sabarnya, pelayanannya, senyumnya, masih kelihatan jelas sampai sekarang. Dia pasti bangga."]},
+  {id:'ragu',label:'buka kalau',title:'lagi ngerasa nggak cukup',body:[
+    "Daftar singkat, buat kamu yang lagi ragu sama diri sendiri:",
+    "✓ berani solo trip<br>✓ sabar sama ratusan nasabah<br>✓ lembur demi mimpi sendiri<br>✓ alisnya setajam itu<br>✓ senyumnya bikin orang lupa lagi kesal<br>✓ anak bipo, jebolan GKPS, boru Simalungun-Toba",
+    "Kurang apa lagi? Nggak ada. <b>Kamu cukup.</b> Dari dulu udah cukup."]},
+  {id:'bahagia',label:'buka kalau',title:'lagi bahagia banget',body:[
+    "Yeay!! 🎉",
+    "Simpan perasaan ini baik-baik, ya. Foto, tulis, rekam, apa aja. Biar nanti pas harinya lagi berat, kamu bisa buka lagi dan ingat: hari kayak gini ada, dan bakal datang lagi.",
+    "(Oh iya, ada seseorang di luar sana yang ikut senang. Walaupun kamu nggak tahu dia ikut senang.)"]},
+  {id:'tidur',label:'buka kalau',title:'nggak bisa tidur',body:[
+    "Oke, coba gini: tarik napas 4 hitungan, tahan 7, buang pelan-pelan 8. Ulang tiga kali.",
+    "Belum ngantuk? Bayangin kamu lagi di pantai Fiji. Ombaknya pelan, palemnya goyang, nggak ada notifikasi, nggak ada antrean. Bulan jagain dari atas.",
+    "Udah, merem aja. Besok masih ada, dan kamu nggak harus nyelesain semuanya malam ini."]},
+  {id:'putus',label:'buka kalau',title:'udah memutuskan soal dia',body:[
+    "Apa pun keputusanmu, aku dukung. Serius.",
+    "Kalau kamu pilih dia, semoga dia tahu betapa beruntungnya dia, dan jagain kamu baik-baik. Kalau kamu pilih jalan sendiri dulu, itu juga berani.",
+    "Yang penting kamu memilih karena tenang, bukan karena takut.",
+    "Lenteraku tetap nyala kok. Bukan buat nagih apa-apa. Cuma biar jalanmu terang."]},
+  {id:'rahasia',label:'terkunci',title:'buka kalau udah nemu 7 lentera',wide:true,secret:true,body:[
+    "Wah, ketemu semua. Teliti banget sih kamu.",
+    "Oke, karena kamu udah nyari sejauh ini, aku jujur sedikit: website ini dibikin pelan-pelan, satu piksel demi satu piksel, buat satu orang aja.",
+    "Aku nggak minta apa-apa. Aku cuma pengen ada satu tempat di internet yang isinya: kamu itu berharga, kamu itu disayang, dan kamu nggak perlu berubah jadi siapa-siapa.",
+    "Kalau suatu hari kamu penasaran siapa yang bawa lentera… mungkin jawabannya lebih dekat dari yang kamu kira."]}
+];
+let opened=new Set(store.get('st_opened',[]));
+function renderEnvs(){
+  const n=found.size; $('#lanternCount').textContent=n;
+  $('#envs').innerHTML=ENVS.map(e=>{
+    const locked=e.secret&&n<7, cls=['env',e.wide?'wide':'',locked?'locked':'',(!locked&&opened.has(e.id))?'opened':''].join(' ');
+    const title=e.secret&&!locked?'buat yang udah nemu semua lentera':e.title;
+    return `<button class="${cls}" data-id="${e.id}"><span class="seal">${locked?'🔒':'🏮'}</span><small>${locked?'terkunci · '+n+'/7 lentera':e.secret?'akhirnya kebuka':e.label}</small><b>${title}</b></button>`;
+  }).join('');
+}
+$('#envs').addEventListener('click',ev=>{
+  const b=ev.target.closest('.env'); if(!b||b.classList.contains('locked'))return;
+  const e=ENVS.find(x=>x.id===b.dataset.id);
+  $('#letterLabel').textContent=e.secret?'surat rahasia':'buka kalau';
+  $('#letterTitle').textContent=e.secret?'Buat yang udah nemu semua lentera':e.title.charAt(0).toUpperCase()+e.title.slice(1);
+  $('#letterBody').innerHTML=e.body.map(p=>`<p>${p}</p>`).join('');
+  $('#letter').classList.add('show'); $('#letter .paper').scrollTop=0;
+  opened.add(e.id); store.set('st_opened',[...opened]); renderEnvs();
+});
+const closeLetter=()=>$('#letter').classList.remove('show');
+$('#letterClose').onclick=closeLetter;
+$('#letter').addEventListener('click',e=>{if(e.target.id==='letter')closeLetter();});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeLetter();});
+renderEnvs();
+
 /* ---------- loop + visibility ---------- */
 const io=new IntersectionObserver(es=>es.forEach(e=>{const s=scenes.find(s=>s.cv===e.target);if(s)s.visible=e.isIntersecting;}),{rootMargin:'100px'});
 scenes.forEach(s=>io.observe(s.cv));
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function loop(ms){const t=ms/1000;scenes.forEach(s=>{if(s.visible){s.c.clearRect(0,0,s.W,s.H);s.draw(s,t);}});if(!reduce)requestAnimationFrame(loop);}
+function loop(ms){const t=ms/1000;scenes.forEach(s=>{if(s.visible){s.c.clearRect(0,0,s.W,s.H);s.draw(s,t);drawLantern(s,t);}});if(!reduce)requestAnimationFrame(loop);}
 scenes.forEach(s=>s.draw(s,1));
 if(!reduce)requestAnimationFrame(loop); else setInterval(()=>loop(performance.now()),1000);
 
