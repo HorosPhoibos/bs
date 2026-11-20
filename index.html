@@ -203,7 +203,19 @@
     <div class="chap-label">Bab 2</div>
     <h2 class="chap-title"><span class="first">O</span>brolan dengan Bulan</h2>
 
-    <div class="card reveal"><p>Sampai kamar. Seragam digantung, ganti baju yang paling nyaman. Jendela dibuka sedikit.</p>
+    <div class="card reveal"><p>Sampai kamar. Seragam digantung, ganti baju yang paling nyaman.</p>
+      <p>Tapi sebelum ngapa-ngapain, ada ritual wajib dulu: <b>depan kaca.</b></p></div>
+
+    <div class="frame reveal"><canvas class="px" id="sMirror" width="160" height="100"></canvas><span class="tap">tap kacanya</span></div>
+    <div class="bubble reveal" id="mirrorBubble">🪞 (dia lagi gaya. tap kacanya)</div>
+
+    <div class="card reveal">
+      <p>Kaca di kamar ini udah lihat semuanya. Senyum yang dilatih sebelum video call. Alis yang dirapiin pelan-pelan. Pose yang direkam lima kali sampai pas.</p>
+      <p>Dan kesimpulan kaca selalu sama: <b>cantik. manis. agak centil.</b> Kaca nggak bisa bohong.</p>
+      <p style="color:var(--muted);font-size:14px">(ada yang setuju sama kaca, by the way)</p>
+    </div>
+
+    <div class="card reveal"><p>Udah puas gaya, jendela dibuka sedikit.</p>
       <p>Bulan malam ini kebetulan lagi pengen ngobrol.</p></div>
 
     <div class="frame reveal"><canvas class="px" id="sRoom" width="160" height="100"></canvas><span class="tap">tap bulannya</span></div>
@@ -557,6 +569,59 @@ scene('sOffice',(s,t)=>{
     const b=$('#officeBubble');b.textContent=officeLines[officeIdx++%officeLines.length];
     b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),250);
   }
+});
+
+/* Bab 2a: depan kaca (mode centil) */
+const SP3={home:sprite(GIRL,homePal,3),blink:sprite(GIRL,homeBlink,3)};
+const POSES=[
+  "Rol rambut masih nempel di poni. Nggak apa-apa, cantik duluan, rapi belakangan 💁‍♀️",
+  "Kedip satu mata 😉 Latihannya bertahun-tahun, hasilnya mematikan.",
+  "Peace ✌️ IB: mba mba lewat fyp.",
+  "Cek alis. Setajam itu ✨ Tenang, nggak ada yang ilfeel.",
+  "Kibas rambut. Anginnya dari mana? Kipas angin. Tapi totalitas.",
+  "Selfie dulu 📸 Diambil 47 kali, yang diposting 1. Standar.",
+  "Kesimpulan kaca: cantik, manis, agak centil. Kaca nggak bisa bohong 💖"
+];
+let pose=0, poseT=-9;
+scene('sMirror',(s,t)=>{
+  const c=s.c, gx=56, gy=18+(Math.sin(t*2.4)>0.7?1:0);
+  const P=(col,row,w,h,col2)=>R(c,gx+col*3,gy+row*3,w*3,h*3,col2);
+  // dinding pastel + titik-titik
+  R(c,0,0,160,100,'#f6cdd6');for(let x=6;x<160;x+=12)for(let y=6;y<80;y+=12)R(c,x+((y/12|0)%2)*6,y,2,2,'#f9dde3');
+  // rak dinding + tanaman + bingkai
+  R(c,112,24,36,2,'#c9a6b0');R(c,116,16,8,8,'#7fb07a');R(c,118,14,4,2,'#7fb07a');R(c,128,14,12,10,'#fffaf0');R(c,130,16,8,6,'#ffb3c4');
+  R(c,14,20,26,18,'#fffaf0');R(c,16,22,22,14,'#9fd2ef');R(c,16,30,22,6,'#5d9a5c');R(c,30,24,4,4,'#fff1c4');
+  // orangnya
+  const blink=(t%3.2)<0.12&&pose!==1;
+  if(pose===4){P(-2,8,3,7,'#1b1420');P(-3,10,1,4,'#1b1420');R(c,gx-14,gy+28,4,1,'#ffffff');R(c,gx-16,gy+34,5,1,'#ffffff');R(c,gx-13,gy+40,3,1,'#ffffff');}
+  c.drawImage(blink?SP3.blink:SP3.home,gx,gy);
+  P(4,7,1,1,'#ff8fab');P(11,7,1,1,'#ff8fab');
+  if(pose===0){R(c,gx+16,gy-2,16,7,'#ff9fb4');R(c,gx+16,gy+1,16,1,'#e27a92');R(c,gx+19,gy-2,1,7,'#e27a92');R(c,gx+24,gy-2,1,7,'#e27a92');R(c,gx+29,gy-2,1,7,'#e27a92');}
+  if(pose===1){P(10,6,2,1,'#f6cfae');R(c,gx+30,gy+20,6,1,'#2a1a22');R(c,gx+31,gy+19,4,1,'#2a1a22');
+    if(Math.floor(t*4)%2){R(c,gx+40,gy+12,1,5,'#fff2a0');R(c,gx+38,gy+14,5,1,'#fff2a0');}}
+  if(pose===2){R(c,gx+40,gy+5,3,13,'#f6cfae');R(c,gx+46,gy+3,3,15,'#f6cfae');R(c,gx+43,gy+12,3,6,'#e0a98a');R(c,gx+39,gy+17,11,9,'#f6cfae');R(c,gx+39,gy+24,11,2,'#e0a98a');}
+  if(pose===3){R(c,gx+11,gy+15,8,2,'#1b1420');R(c,gx+17,gy+14,2,1,'#1b1420');R(c,gx+29,gy+15,8,2,'#1b1420');R(c,gx+29,gy+14,2,1,'#1b1420');
+    const g=Math.floor(t*5)%2;R(c,gx+38+g,gy+10,1,4,'#ffffff');R(c,gx+37+g,gy+11,3,1,'#ffffff');}
+  if(pose===5){R(c,gx+38,gy+26,12,20,'#2b2b3a');R(c,gx+40,gy+28,8,16,'#7fb8e6');R(c,gx+36,gy+40,6,6,'#f6cfae');
+    if((t-poseT)%1.4<0.12){c.globalAlpha=0.7;R(c,0,0,160,100,'#ffffff');c.globalAlpha=1;}}
+  // meja rias
+  R(c,0,80,160,20,'#e8b4c0');R(c,0,80,160,2,'#f3c9d3');R(c,0,96,160,4,'#d39aa8');
+  R(c,20,70,6,10,'#c0392b');R(c,20,68,6,2,'#d9d9e0');R(c,21,64,4,4,'#e2304a');
+  R(c,32,72,10,8,'#bfe6ff');R(c,34,68,6,4,'#c9a227');R(c,35,66,4,2,'#c9a227');
+  R(c,118,74,14,6,'#ffffff');R(c,119,70,12,4,'#ffd6e0');
+  R(c,138,72,10,8,'#fffaf0');disc(c,143,70,3,'#ff9fb4');
+  // bingkai kaca dengan lampu bulat
+  R(c,0,0,160,3,'#e9d3a3');R(c,0,97,160,3,'#e9d3a3');R(c,0,0,3,100,'#e9d3a3');R(c,157,0,3,100,'#e9d3a3');
+  for(let x=10;x<160;x+=18){const on=Math.sin(t*2+x)>-0.6;disc(c,x,2,2,on?'#fff4c2':'#d9c9a0');}
+  for(let y=16;y<96;y+=18){disc(c,2,y,2,'#fff4c2');disc(c,157,y,2,'#fff4c2');}
+  // hati beterbangan setelah ganti gaya
+  const since=t-poseT;
+  if(since<2.2)for(let k=0;k<6;k++){const p=since/2.2,side=k%2?1:-1;c.globalAlpha=1-p;c.drawImage(SP.heart,gx+20+side*(30+k*4)+Math.sin(p*8+k)*3,gy+30-p*34-k*3);}
+  c.globalAlpha=1;
+},(s,x,y)=>{
+  pose=(pose+1)%POSES.length; poseT=performance.now()/1000;
+  const b=$('#mirrorBubble');b.textContent="🪞 "+POSES[pose];
+  b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),250);
 });
 
 /* Bab 2: kamar + bulan */
@@ -953,6 +1018,7 @@ const replies=[
   [/horas/,"Horas! 🙌 (bulan lagi belajar bahasa Batak, maklumin ya)"],
   [/\bbula\b/,"Bula! 🌺 Itu 'halo'-nya Fiji. Wah, udah latihan nih ceritanya."],
   [/gkps|gereja|minggu/,"Sampai ketemu hari Minggu di GKPS ya. Semoga ibadahnya teduh 🕊️"],
+  [/kaca|cantik|centil|manis|alis/,"Bulan konfirmasi: kacanya jujur. Cantik, manis, centil dikit. Pas 💖"],
   [/mama|bipo|inang/,"Bintang yang paling terang malam ini kayaknya lagi senyum 🤍"],
   [/dipasu|pasu-pasu|pasu pasu/,"Amin! Di GKPS juga ya nanti. Bulan diundang nggak? 🤭"],
   [/utte|mukkur/,"Utte mukkur lebih ampuh dari dating app, katanya 🍋 bulan nggak ikut-ikutan ya."],
