@@ -224,6 +224,12 @@
       <p style="font-size:13px;color:var(--muted);margin-top:12px;text-align:center">jawab jujur aja, nggak ada yang ngintip. tiap jawaban, kabutnya menipis.</p>
     </div>
     <div class="card result" id="qResult"></div>
+
+    <div class="card reveal">
+      <p>Oh iya, bulan hampir lupa.</p>
+      <p>Kalau kamu lihat lagi gambar persimpangan tadi, di pojok kanan bawah ada yang berdiri sendirian pegang lentera. Dia nggak ngehalangin jalan siapa-siapa. Dia juga nggak minta dipilih.</p>
+      <p>Dia cuma pengen jalan yang kamu pilih nanti nggak gelap. Dan kalau suatu hari kamu nengok ke pinggir, dia masih di situ. Nggak buru-buru.</p>
+    </div>
   </section>
 
   <div class="ulos" title="tap aku"></div>
@@ -246,7 +252,7 @@
       <div class="st" style="--r:-5deg;--c:#c0392b"><b>MALAYSIA</b><small>tetangga, wajib ✓</small></div>
       <div class="st" style="--r:4deg;--c:#8a5a0e"><b>THAILAND</b><small>sawasdee ka ✓</small></div>
       <div class="st" style="--r:-7deg;--c:#1f7a3f"><b>VIETNAM</b><small>xin chào ✓</small></div>
-      <div class="st" style="--r:3deg;--c:#777;border-style:dashed"><b>NEXT TRIP</b><small>P info‼️</small></div>
+      <div class="st" style="--r:3deg;--c:#777;border-style:dashed"><b>NEXT TRIP</b><small>P info‼️ (ada yang mau ikut, katanya)</small></div>
     </div>
 
     <div class="trip reveal">
@@ -299,12 +305,26 @@
     <div class="chap-label">Bab 4</div>
     <h2 class="chap-title"><span class="first">A</span>min</h2>
 
+    <div class="card reveal"><p>Sebelum lampu dimatikan, ada satu cerita lagi.</p>
+      <p>Dulu, ada seorang bipo di GKPS. Kerjanya mengajar firman, mengunjungi jemaat, menemani yang lagi susah. Di rumah, dia dipanggil Mama.</p></div>
+
+    <div class="frame reveal"><canvas class="px" id="sMama" width="160" height="80"></canvas><span class="tap">tap bintangnya</span></div>
+    <div class="bubble reveal" id="mamaBubble">✨ (ada satu bintang yang nyalanya beda. tap aja)</div>
+
+    <div class="card reveal">
+      <p>Jadi anak bipo itu ada suka-dukanya. Bolos sekolah Minggu? Langsung ketahuan, satu gereja kenal mamamu. Nyanyi fals pas kebaktian? Ada yang ngelirik dari bangku depan. Doa makan aja bisa lima menit 😄</p>
+      <p>Tapi ada juga yang diwariskan diam-diam. Sabar dengerin orang sampai habis. Nanya kabar dengan tulus. Bantu orang tanpa banyak omong.</p>
+      <p>Kedengarannya kayak kerjaan CS, ya? Mungkin memang begitu. Mama melayani di gereja, kamu melayani lewat telepon. Bentuknya beda, hatinya sama.</p>
+      <p><b>Mama udah lama pergi. Tapi yang dia tanam masih tumbuh, dan tiap hari kedengaran di suaramu.</b></p>
+    </div>
+
     <div class="card reveal"><p>Lampu dimatikan. HP ditaruh (nanti, setelah ini). Selimut ditarik sampai dagu.</p></div>
 
     <div class="frame reveal"><canvas class="px" id="sSleep" width="160" height="100"></canvas></div>
 
     <div class="card reveal prayer">
-      <p>Tuhan, makasih buat hari ini.<br>Buat suara yang tetap sabar walau capek.<br>Buat mimpi-mimpi yang masih panjang.<br>Jaga hatiku, terangi jalanku,<br>dan biar besok aku bangun dengan tenang.<br>Amin.</p>
+      <p style="font-style:normal;color:var(--muted)">Doa malam, kayak yang dulu diajarin di rumah:</p>
+      <p>Tuhan, makasih buat hari ini.<br>Buat suara yang tetap sabar walau capek.<br>Buat mimpi-mimpi yang masih panjang.<br>Jaga hatiku, terangi jalanku,<br>titip peluk buat Mama,<br>dan biar besok aku bangun dengan tenang.<br>Amin.</p>
       <p class="verse">"Dengan tenteram aku mau membaringkan diri, lalu segera tidur, sebab hanya Engkaulah, ya TUHAN, yang membiarkan aku diam dengan aman." (Mazmur 4:9)</p>
     </div>
 
@@ -608,6 +628,7 @@ $('#moonBubble').textContent = lateNight ? "🌙 (bulannya kelihatan agak cember
 
 /* Bab 2b: persimpangan */
 const quiz={answered:0,yes:0};
+const HIM=sprite(BACK,{h:'#2a2018',u:'#3a5a8a',k:'#2c2c3a',s:'#f0c8a0'},1);
 const crossStars=(()=>{const r=rnd(3);return Array.from({length:30},()=>[r()*160,r()*44,r()*6]);})();
 scene('sCross',(s,t)=>{
   const c=s.c, fog=1-quiz.answered/5*0.9, lit=quiz.answered;
@@ -642,6 +663,9 @@ scene('sCross',(s,t)=>{
   c.globalAlpha=Math.max(0,fog)*0.4;
   for(let k=0;k<9;k++){const x=96+((k*23+t*(2+k%2))%70)-6,y=28+(k*11)%34;R(c,x,y,26,5,'#d8dcf0');R(c,x+4,y-2,16,2,'#d8dcf0');}
   c.globalAlpha=1;
+  // seseorang di pinggir jalan, pegang lentera, nggak menghalangi siapa-siapa
+  disc(c,146,76,7,`rgba(255,207,110,${0.18+Math.sin(t*2)*0.05})`);
+  c.drawImage(HIM,148,72);R(c,145,76,1,3,'#3a2a1a');R(c,144,79,3,3,'#ffcf6e');
 });
 
 const QS=[
@@ -783,6 +807,57 @@ scene('sToba',(s,t)=>{
   c.drawImage(SP.homeGirl,104,76);R(c,111,82,4,5,'#c0392b');R(c,112,81,2,1,'#5a3a28');
 });
 
+/* Bab 4a: meja Mama */
+const mamaLines=[
+  "(bintangnya nggak ngomong apa-apa. cuma nyala sedikit lebih terang.)",
+  "Kalau Mama lihat kamu sekarang, kayaknya dia senyum. Terus nanya: \"udah makan?\"",
+  "Anak gadisnya keliling negara sendirian, tapi tetap ingat pulang ke GKPS. Bangga, pasti.",
+  "Kangen itu boleh. Itu cuma sayang yang masih punya banyak cerita 🤍"
+];
+let mamaIdx=0, mamaTapT=-9;
+const mamaStars=(()=>{const r=rnd(31);return Array.from({length:16},()=>[98+r()*52,8+r()*40,r()*6]);})();
+scene('sMama',(s,t)=>{
+  const c=s.c;
+  R(c,0,0,160,80,'#1d1f45');for(let x=4;x<160;x+=10)for(let y=4;y<56;y+=10)R(c,x,y,1,1,'#262a58');
+  // jendela + bintang paling terang
+  R(c,94,4,60,48,'#3a3058');
+  c.save();c.beginPath();c.rect(96,6,56,44);c.clip();
+  vgrad(c,96,6,56,44,['#0b0e2a','#18205a'],5);
+  mamaStars.forEach(([x,y,ph])=>{if(Math.sin(t*1.4+ph)>-0.2)R(c,x,y,1,1,'#fff7d0');});
+  const boost=Math.max(0,1-(t-mamaTapT)/2.5), pulse=0.5+0.5*Math.sin(t*1.6);
+  disc(c,124,22,7+Math.round(boost*3),`rgba(255,214,140,${0.10+pulse*0.08+boost*0.15})`);
+  disc(c,124,22,4,`rgba(255,226,160,${0.25+pulse*0.15+boost*0.3})`);
+  R(c,123,16,3,13,'#fff3cf');R(c,118,21,13,3,'#fff3cf');R(c,122,20,5,5,'#ffffff');
+  c.restore();
+  R(c,96,27,56,2,'#3a3058');R(c,92,50,64,3,'#4a3e6a');
+  // foto Mama di dinding
+  R(c,58,10,18,22,'#c9a227');R(c,60,12,14,18,'#f2e3c6');
+  disc(c,67,18,3,'#3a2a2a');R(c,64,22,7,6,'#8e5a7a');R(c,66,19,3,3,'#e8bfa0');
+  // meja
+  R(c,0,56,160,24,'#5a3d30');R(c,0,56,160,2,'#6e4b3b');for(let x=0;x<160;x+=22)R(c,x,60,1,20,'#4d3328');
+  // Alkitab + buku nyanyian
+  R(c,14,46,42,10,'#6b1e24');R(c,16,53,38,2,'#f2e3c6');R(c,14,46,42,1,'#82262d');
+  R(c,34,48,1,5,'#c9a227');R(c,32,50,5,1,'#c9a227');
+  R(c,20,40,28,6,'#21406e');R(c,22,44,24,1,'#f2e3c6');R(c,20,40,28,1,'#2c5290');
+  // kacamata baca
+  R(c,24,37,6,1,'#c9a227');R(c,24,39,6,1,'#c9a227');R(c,24,37,1,3,'#c9a227');R(c,29,37,1,3,'#c9a227');
+  R(c,33,37,6,1,'#c9a227');R(c,33,39,6,1,'#c9a227');R(c,33,37,1,3,'#c9a227');R(c,38,37,1,3,'#c9a227');R(c,30,38,3,1,'#c9a227');
+  // lilin
+  const f=Math.sin(t*9)>0?0:1;
+  disc(c,74,40,9,'rgba(255,207,110,0.10)');
+  R(c,70,44,7,12,'#fffaf0');R(c,70,44,7,1,'#f0e6d0');R(c,73,42,1,2,'#3a2a2a');
+  R(c,72,38+f,3,4,'#ffcf6e');R(c,73,37+f,1,2,'#fff4c2');
+  R(c,66,55,15,2,'#c9a227');
+  // salib kecil di dinding
+  R(c,36,14,2,12,'#c9a227');R(c,32,17,10,2,'#c9a227');
+},(s,x,y)=>{
+  if(x>96&&x<152&&y>6&&y<50){
+    mamaTapT=performance.now()/1000;
+    const b=$('#mamaBubble');b.textContent="✨ "+mamaLines[mamaIdx++%mamaLines.length];
+    b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),250);
+  }
+});
+
 /* Bab 4: tidur */
 const sleepStars=(()=>{const r=rnd(19);return Array.from({length:18},()=>[12+r()*52,10+r()*36,r()*6]);})();
 scene('sSleep',(s,t)=>{
@@ -878,6 +953,7 @@ const replies=[
   [/horas/,"Horas! 🙌 (bulan lagi belajar bahasa Batak, maklumin ya)"],
   [/\bbula\b/,"Bula! 🌺 Itu 'halo'-nya Fiji. Wah, udah latihan nih ceritanya."],
   [/gkps|gereja|minggu/,"Sampai ketemu hari Minggu di GKPS ya. Semoga ibadahnya teduh 🕊️"],
+  [/mama|bipo|inang/,"Bintang yang paling terang malam ini kayaknya lagi senyum 🤍"],
   [/dipasu|pasu-pasu|pasu pasu/,"Amin! Di GKPS juga ya nanti. Bulan diundang nggak? 🤭"],
   [/utte|mukkur/,"Utte mukkur lebih ampuh dari dating app, katanya 🍋 bulan nggak ikut-ikutan ya."],
   [/singapur|singapore/,"Pernah. Mau lagi? ENGGA. 😂 Bulan setuju, mending ke Fiji."],
@@ -888,6 +964,7 @@ const replies=[
   [/bage|kampung|simalungun/,"Salam buat Bage. Bulan juga nongol di sana tiap malam kok 🌙"],
   [/\bbora\b/,"Ssst… itu rahasia 🤫 Coba lihat lagi huruf pertama tiap bab."],
   [/siapa|yang buat|yang bikin/,"Aku cuma bulan. Tapi iya, ada yang nitip salam 🌙"],
+  [/lentera|pinggir|pojok/,"Iya, yang pegang lentera itu. Dia nggak ke mana-mana kok 🏮"],
   [/capek|lelah|cape/,"Sini, taruh capeknya di bulan. Besok pagi kamu ambil semangatnya aja ☁️"],
   [/galau|bingung|ragu|hts|dia/,"Nggak harus diputuskan malam ini. Hati juga butuh tidur."],
   [/bali/,"Yang ke Bali sendirian itu kamu kan? Keren banget, serius."],
