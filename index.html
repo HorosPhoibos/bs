@@ -61,6 +61,17 @@
   .bubble.pop{transform:scale(1.03)}
 
   /* receipt */
+  .cert{background:#fffaf0;color:#2b2233;margin:26px 6px;padding:8px;box-shadow:0 12px 26px rgba(0,0,0,.35);transform:rotate(.8deg)}
+  .cert-in{border:3px double #c9a227;padding:18px 16px 16px;text-align:center}
+  .cert-top{font-family:"Pixelify Sans";font-size:12px;letter-spacing:3px;color:#a8323a}
+  .cert h4{font-family:"Pixelify Sans";font-size:24px;margin:6px 0 6px;line-height:1.15}
+  .cert-sub{font-size:13px;color:#6a5a6a;margin:0 0 12px}
+  .crow{display:flex;justify-content:space-between;gap:10px;text-align:left;font-size:14px;padding:6px 0;border-bottom:1px dotted #d8c9b4}
+  .crow b{color:#8e1b1b;text-align:right}
+  .cert-foot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:12px;color:#6a5a6a;text-align:left}
+  .cert-foot span:last-child{text-align:right}
+  .cert-stamp{font-family:"Pixelify Sans";color:#a8323a;border:3px solid #a8323a;border-radius:50%;width:66px;height:66px;display:grid;place-items:center;
+              transform:rotate(-12deg);font-size:13px;flex:none}
   .receipt{background:#fffaf0;color:#2b2b2b;font-family:"Pixelify Sans",monospace;font-size:15px;padding:18px 18px 22px;margin:20px 10px;
            box-shadow:0 10px 24px rgba(0,0,0,.3);transform:rotate(-1.2deg);position:relative;
            -webkit-mask:radial-gradient(circle 6px at 50% 100%,transparent 98%,#000) 0 0/14px 100%}
@@ -270,7 +281,7 @@
       <p>Oh iya, bulan hampir lupa.</p>
       <p>Kalau kamu lihat lagi gambar persimpangan tadi, di pojok kanan bawah ada yang berdiri sendirian pegang lentera. Dia nggak ngehalangin jalan siapa-siapa. Dia juga nggak minta dipilih.</p>
       <p>Dia cuma pengen jalan yang kamu pilih nanti nggak gelap. Dan kalau suatu hari kamu nengok ke pinggir, dia masih di situ. Nggak buru-buru.</p>
-      <p style="color:var(--muted);font-size:14px">Katanya dia juga suka ninggalin lentera kecil di mana-mana. Ada 7, nyempil di gambar-gambar cerita ini. Kalau ketemu, tap aja 🏮</p>
+      <p style="color:var(--muted);font-size:14px">Katanya dia juga suka ninggalin lentera kecil di mana-mana. Ada 8, nyempil di gambar-gambar cerita ini. Kalau ketemu, tap aja 🏮</p>
     </div>
   </section>
 
@@ -375,6 +386,45 @@
       <div class="moonbox"><input id="moonInput" placeholder="tulis apa aja…" maxlength="80" autocomplete="off"><button id="moonSend">kirim</button></div>
       <div class="moonreply" id="moonReply"></div>
     </div>
+  </section>
+
+  <div class="ulos" title="tap aku"></div>
+
+  <!-- BAB BONUS -->
+  <section class="chapter">
+    <div class="chap-label">Bab Bonus</div>
+    <h2 class="chap-title"><span class="first">✦</span> Mimpi Indah</h2>
+
+    <div class="card reveal"><p>Begitu matanya terpejam, kamarnya pelan-pelan hilang. Ganti jadi awan. Ganti jadi panggung.</p>
+      <p>Lho, kok ada piala?</p></div>
+
+    <div class="frame reveal"><canvas class="px" id="sDream" width="160" height="100"></canvas><span class="tap">tap panggungnya</span></div>
+    <div class="bubble reveal" id="dreamBubble">🎤 "Dan pemenangnya adalah…" (tap)</div>
+
+    <div class="card reveal">
+      <p><b>Malam ini, di mimpi:</b></p>
+      <p>☁️ Semua nasabah ingat PIN-nya sendiri.<br>
+         ☁️ Antrean habis tepat jam lima. Nggak ada lembur.<br>
+         ☁️ Tiket ke Fiji jatuh dari langit, gratis, plus bagasi 30 kg.<br>
+         ☁️ Alisnya rapi sendiri, simetris, tanpa usaha.<br>
+         ☁️ Salju turun di Bage, cuma sebentar, cuma buat kamu lihat.<br>
+         ☁️ Dan di bangku penonton paling belakang, ada yang tepuk tangan paling keras. Bawa lentera.</p>
+    </div>
+
+    <div class="cert reveal">
+      <div class="cert-in">
+        <div class="cert-top">✦ SERTIFIKAT RESMI ✦</div>
+        <h4>Kecantikan Tingkat Semesta</h4>
+        <p class="cert-sub">Dengan ini dinyatakan bahwa pembaca website ini telah lulus penilaian dengan hasil:</p>
+        <div class="crow"><span>Senyum (kedengaran lewat telepon)</span><b>sempurna</b></div>
+        <div class="crow"><span>Alis</span><b>tajam, terverifikasi</b></div>
+        <div class="crow"><span>Suara pas bilang "ada yang bisa dibantu?"</span><b>menenangkan</b></div>
+        <div class="crow"><span>Gaya depan kaca</span><b>centil, sah</b></div>
+        <div class="crow"><span>Nyali solo trip</span><b>luar biasa</b></div>
+        <div class="crow"><span>Hati</span><b>paling cantik dari semuanya</b></div>
+        <div class="cert-foot"><span>Diterbitkan oleh:<br><b>Bulan</b></span><span class="cert-stamp">SAH 💖</span><span>Disaksikan oleh:<br><b>si pembawa lentera</b></span></div>
+      </div>
+    </div>
 
     <p class="reveal" style="text-align:center;color:var(--muted);margin-top:50px">Lihat ke atas sebentar.</p>
     <canvas class="px" id="sConst" width="200" height="72" style="margin:10px 0"></canvas>
@@ -396,7 +446,7 @@
       <p>Bukanya pas waktunya aja. Kapan pun, website ini nggak ke mana-mana.</p>
     </div>
     <div class="envs reveal" id="envs"></div>
-    <p class="reveal" style="text-align:center;color:var(--muted);font-size:14px;margin-top:18px">🏮 lentera ditemukan: <b id="lanternCount">0</b>/7</p>
+    <p class="reveal" style="text-align:center;color:var(--muted);font-size:14px;margin-top:18px">🏮 lentera ditemukan: <b id="lanternCount">0</b>/8</p>
   </section>
 
   <div id="letter" role="dialog" aria-modal="true" aria-labelledby="letterTitle">
@@ -925,6 +975,65 @@ scene('sToba',(s,t)=>{
   c.drawImage(SP.homeGirl,104,76);R(c,111,82,4,5,'#c0392b');R(c,112,81,2,1,'#5a3a28');
 });
 
+/* Bab Bonus: mimpi indah */
+const dreamPal={...BASE,u:'#f2c14e',U:'#d9a12e',w:'#f6cfae',y:'#fff4c2',g:'#1b1420',k:'#f2c14e',e:'#2a1a22'};
+const DREAM={girl:sprite(GIRL,dreamPal,2),blink:sprite(GIRL,{...dreamPal,e:'#e0a98a'},2)};
+const dreamLines=[
+  "Dan pemenangnya… CS Terbaik Sejagat Raya! 🏆",
+  "Kategori: Suara Paling Sabar se-Asia Tenggara. Menang lagi!",
+  "Kategori: Explorer Paling Nekat. Iya, kamu lagi.",
+  "Kategori: Paling Centil Depan Kaca. Juri sepakat, tanpa voting.",
+  "Pidato kemenangan: \"Makasih Tuhan, makasih Mama, makasih nasabah yang lupa PIN…\" 🥹",
+  "(penonton paling belakang tepuk tangan paling keras. dia bawa lentera.)"
+];
+let dreamIdx=0, confetti=[];
+const dreamStars=(()=>{const r=rnd(41);return Array.from({length:28},()=>[r()*160,r()*60,r()*6]);})();
+const CONF=['#ff7a9c','#f2c14e','#7fd3f7','#9be39b','#ffffff','#c99bff'];
+function burst(){const r=rnd((Math.random()*1e6)|0);for(let i=0;i<70;i++)confetti.push({x:20+r()*120,y:-r()*30,vx:(r()-0.5)*14,vy:10+r()*22,c:CONF[i%CONF.length],t0:performance.now()/1000});}
+scene('sDream',(s,t)=>{
+  const c=s.c;
+  vgrad(c,0,0,160,100,['#24184f','#4e3290','#a95aa6','#f2a3c0'],9);
+  dreamStars.forEach(([x,y,ph])=>{if(Math.sin(t*1.6+ph)>-0.1)R(c,x,y,1,1,'#fff7d0');});
+  for(let y=-6;y<=6;y++)for(let x=-6;x<=6;x++){if(x*x+y*y<=36&&(x-3)*(x-3)+(y+2)*(y+2)>30)R(c,18+x,14+y,1,1,'#fff2c2');}
+  // awan latar
+  [[10,52,0.6],[110,44,0.4],[60,60,0.8]].forEach(([x0,y,sp],i)=>{const x=(x0+t*sp*3)%200-30;c.globalAlpha=0.55;R(c,x,y,30,5,'#f7c6d9');R(c,x+6,y-3,16,3,'#f7c6d9');c.globalAlpha=1;});
+  // spanduk
+  R(c,38,8,84,12,'#a8323a');R(c,38,8,84,1,'#f2c14e');R(c,38,19,84,1,'#f2c14e');R(c,34,10,4,10,'#8e1b1b');R(c,122,10,4,10,'#8e1b1b');
+  for(let x=44;x<118;x+=6){const on=Math.sin(t*4+x)>0;R(c,x,13,2,2,on?'#fff4c2':'#f2c14e');}
+  // lampu sorot
+  c.globalAlpha=0.10+0.04*Math.sin(t*2);
+  for(let y=0;y<74;y++){const w=4+y*0.45;R(c,8+y*0.8-w/2,y,w,1,'#fff4c2');R(c,152-y*0.8-w/2,y,w,1,'#fff4c2');}
+  c.globalAlpha=1;
+  // panggung awan
+  R(c,34,74,92,9,'#ffffff');[40,52,64,76,88,100,112,122].forEach((x,i)=>disc(c,x,74,5+(i%2),'#ffffff'));
+  R(c,34,82,92,1,'#e7d9f2');
+  // piala
+  R(c,106,62,12,12,'#e9d3a3');R(c,106,62,12,1,'#f6e7c2');
+  R(c,106,48,12,7,'#f2c14e');R(c,108,55,8,2,'#f2c14e');R(c,111,57,2,3,'#d9a12e');R(c,108,60,8,2,'#d9a12e');
+  R(c,103,49,3,1,'#f2c14e');R(c,103,49,1,4,'#f2c14e');R(c,118,49,3,1,'#f2c14e');R(c,120,49,1,4,'#f2c14e');R(c,108,49,2,4,'#fff4c2');
+  if(Math.floor(t*3)%2){R(c,121,44,1,3,'#ffffff');R(c,120,45,3,1,'#ffffff');}
+  // dia, bergaun emas, pakai tiara
+  const gx=62,gy=30+(Math.sin(t*2)>0.6?1:0);
+  c.drawImage((t%3.4)<0.12?DREAM.blink:DREAM.girl,gx,gy);
+  R(c,gx+10,gy+1,12,2,'#f2c14e');R(c,gx+11,gy-1,2,2,'#f2c14e');R(c,gx+15,gy-2,2,3,'#f2c14e');R(c,gx+19,gy-1,2,2,'#f2c14e');R(c,gx+15,gy-1,2,1,'#ff7a9c');
+  for(let i=0;i<9;i++)R(c,gx+8+Math.round(i*1.6),gy+22+i,3,2,'#ff9fb4');
+  for(let k=0;k<4;k++){const a=t*1.5+k*1.57,x=gx+16+Math.cos(a)*24,y=gy+22+Math.sin(a)*14;if(Math.sin(t*5+k)>0){R(c,x,y-1,1,3,'#fff4c2');R(c,x-1,y,3,1,'#fff4c2');}}
+  // penonton
+  const hair=['#1b1420','#3a2a1a','#5a3a28','#1b1420','#2a2a3a','#6b3f22'];
+  for(let k=0;k<12;k++){const x=8+k*12,bob=Math.sin(t*6+k)>0.3?1:0,y=93-bob;
+    R(c,x-5,y+3,11,6,['#2453a8','#c0392b','#4c9a5b','#8e5a7a','#e6a93a','#3a5a8a'][k%6]);
+    disc(c,x,y,4,hair[k%6]);R(c,x-2,y+1,5,2,'#f0c8a0');
+    if(Math.sin(t*8+k*2)>0){R(c,x-6,y-4,2,3,'#f0c8a0');R(c,x+5,y-4,2,3,'#f0c8a0');}}
+  // konfeti
+  const now=performance.now()/1000;
+  confetti=confetti.filter(p=>now-p.t0<4);
+  confetti.forEach(p=>{const d=now-p.t0;R(c,p.x+p.vx*d+Math.sin(d*6+p.x)*3,p.y+p.vy*d,2,1+(Math.floor(d*8+p.x)%2),p.c);});
+},(s,x,y)=>{
+  burst();
+  const b=$('#dreamBubble');b.textContent="🎤 "+dreamLines[dreamIdx++%dreamLines.length];
+  b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),250);
+});
+
 /* Bab 4a: meja Mama */
 const mamaLines=[
   "(bintangnya nggak ngomong apa-apa. cuma nyala sedikit lebih terang.)",
@@ -1049,7 +1158,7 @@ const sConst=scene('sConst',(s,t)=>{
 });
 
 /* ---------- lentera tersembunyi ---------- */
-const LANTERNS={sOffice:[146,57],sBali:[140,20],sFiji:[132,80],sSnow:[94,64],sEgypt:[142,76],sToba:[150,60],sSleep:[29,60]};
+const LANTERNS={sOffice:[146,57],sBali:[140,20],sFiji:[132,80],sSnow:[94,64],sEgypt:[142,76],sToba:[150,60],sSleep:[29,60],sDream:[150,66]};
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
 let found=new Set(store.get('st_lanterns',[]).filter(id=>LANTERNS[id]));
 function drawLantern(s,t){
@@ -1058,14 +1167,14 @@ function drawLantern(s,t){
   R(c,x-1,y-3,3,1,'#3a2a1a');R(c,x,y-4,1,1,'#3a2a1a');R(c,x-1,y-2,3,4,'#ffcf6e');R(c,x,y-1,1,2,'#fff4c2');R(c,x-1,y+2,3,1,'#3a2a1a');
   if(on){const b=(t*0.8)%1;c.globalAlpha=1-b;R(c,x-1,y-7-b*4,1,1,'#ff7a9c');R(c,x+1,y-7-b*4,1,1,'#ff7a9c');R(c,x-1,y-6-b*4,3,1,'#ff7a9c');R(c,x,y-5-b*4,1,1,'#ff7a9c');c.globalAlpha=1;}
 }
-const lanternMsgs=["Eh, ketemu! 🏮","Teliti juga ya 🏮","Satu lagi! 🏮","Wah, jago nyari 🏮","Hampir setengah jalan… 🏮","Tinggal sedikit lagi 🏮","Semua ketemu! Ada amplop yang kebuka 💌"];
+const lanternMsgs=["Eh, ketemu! 🏮","Teliti juga ya 🏮","Satu lagi! 🏮","Wah, jago nyari 🏮","Setengah jalan! 🏮","Lewat setengah… 🏮","Tinggal sedikit lagi 🏮","Semua ketemu! Ada amplop yang kebuka 💌"];
 Object.keys(LANTERNS).forEach(id=>{
   const cv=document.getElementById(id); if(!cv)return;
   cv.addEventListener('click',e=>{
     const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*cv.width,y=(e.clientY-r.top)/r.height*cv.height,[lx,ly]=LANTERNS[id];
     if(Math.hypot(x-lx,y-ly)>8||found.has(id))return;
     found.add(id);store.set('st_lanterns',[...found]);
-    toast(`${lanternMsgs[Math.min(found.size,7)-1]}  ${found.size}/7`);renderEnvs();
+    toast(`${lanternMsgs[Math.min(found.size,8)-1]}  ${found.size}/8`);renderEnvs();
   });
 });
 
@@ -1104,12 +1213,17 @@ const ENVS=[
     "Oke, coba gini: tarik napas 4 hitungan, tahan 7, buang pelan-pelan 8. Ulang tiga kali.",
     "Belum ngantuk? Bayangin kamu lagi di pantai Fiji. Ombaknya pelan, palemnya goyang, nggak ada notifikasi, nggak ada antrean. Bulan jagain dari atas.",
     "Udah, merem aja. Besok masih ada, dan kamu nggak harus nyelesain semuanya malam ini."]},
+  {id:'ketawa',label:'buka kalau',title:'lagi butuh ketawa',body:[
+    "Oke, khusus buat kamu, lelucon versi CS:",
+    "Nasabah: \"Mbak, saldo saya kok berkurang terus ya?\"<br>CS: \"Itu namanya hidup, Pak.\" 🙃",
+    "Nasabah: \"Mbak, kartu saya ketelan mesin ATM.\"<br>CS: \"Mesinnya lagi lapar, Pak. Tenang, kami bantu keluarin.\"",
+    "Udah ketawa belum? Kalau belum, bayangin aja mukaku pas nulis ini: mikir lima belas menit, hasilnya cuma segini. Nah, itu baru lucu 😄"]},
   {id:'putus',label:'buka kalau',title:'udah memutuskan soal dia',body:[
     "Apa pun keputusanmu, aku dukung. Serius.",
     "Kalau kamu pilih dia, semoga dia tahu betapa beruntungnya dia, dan jagain kamu baik-baik. Kalau kamu pilih jalan sendiri dulu, itu juga berani.",
     "Yang penting kamu memilih karena tenang, bukan karena takut.",
     "Lenteraku tetap nyala kok. Bukan buat nagih apa-apa. Cuma biar jalanmu terang."]},
-  {id:'rahasia',label:'terkunci',title:'buka kalau udah nemu 7 lentera',wide:true,secret:true,body:[
+  {id:'rahasia',label:'terkunci',title:'buka kalau udah nemu 8 lentera',wide:true,secret:true,body:[
     "Wah, ketemu semua. Teliti banget sih kamu.",
     "Oke, karena kamu udah nyari sejauh ini, aku jujur sedikit: website ini dibikin pelan-pelan, satu piksel demi satu piksel, buat satu orang aja.",
     "Aku nggak minta apa-apa. Aku cuma pengen ada satu tempat di internet yang isinya: kamu itu berharga, kamu itu disayang, dan kamu nggak perlu berubah jadi siapa-siapa.",
@@ -1119,9 +1233,9 @@ let opened=new Set(store.get('st_opened',[]));
 function renderEnvs(){
   const n=found.size; $('#lanternCount').textContent=n;
   $('#envs').innerHTML=ENVS.map(e=>{
-    const locked=e.secret&&n<7, cls=['env',e.wide?'wide':'',locked?'locked':'',(!locked&&opened.has(e.id))?'opened':''].join(' ');
+    const locked=e.secret&&n<8, cls=['env',e.wide?'wide':'',locked?'locked':'',(!locked&&opened.has(e.id))?'opened':''].join(' ');
     const title=e.secret&&!locked?'buat yang udah nemu semua lentera':e.title;
-    return `<button class="${cls}" data-id="${e.id}"><span class="seal">${locked?'🔒':'🏮'}</span><small>${locked?'terkunci · '+n+'/7 lentera':e.secret?'akhirnya kebuka':e.label}</small><b>${title}</b></button>`;
+    return `<button class="${cls}" data-id="${e.id}"><span class="seal">${locked?'🔒':'🏮'}</span><small>${locked?'terkunci · '+n+'/8 lentera':e.secret?'akhirnya kebuka':e.label}</small><b>${title}</b></button>`;
   }).join('');
 }
 $('#envs').addEventListener('click',ev=>{
@@ -1177,6 +1291,7 @@ const replies=[
   [/horas/,"Horas! 🙌 (bulan lagi belajar bahasa Batak, maklumin ya)"],
   [/\bbula\b/,"Bula! 🌺 Itu 'halo'-nya Fiji. Wah, udah latihan nih ceritanya."],
   [/gkps|gereja|minggu/,"Sampai ketemu hari Minggu di GKPS ya. Semoga ibadahnya teduh 🕊️"],
+  [/mimpi|piala|juara|sertifikat/,"Mimpinya disimpan bulan. Pialanya beneran kok, cuma belum dikirim aja 🏆"],
   [/kaca|cantik|centil|manis|alis/,"Bulan konfirmasi: kacanya jujur. Cantik, manis, centil dikit. Pas 💖"],
   [/mama|bipo|inang/,"Bintang yang paling terang malam ini kayaknya lagi senyum 🤍"],
   [/dipasu|pasu-pasu|pasu pasu/,"Amin! Di GKPS juga ya nanti. Bulan diundang nggak? 🤭"],
