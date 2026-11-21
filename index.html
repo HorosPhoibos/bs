@@ -77,9 +77,19 @@
   .mailbox .pick{display:inline-block;margin:10px 0 4px;cursor:pointer;font-family:"Pixelify Sans";font-size:16px;color:#2a1b3d;background:#fff7ea;
                  padding:10px 18px;border-radius:30px;box-shadow:0 4px 0 #bdb3d6}
   .mailbox .pick input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-  .mailbox img{display:none;max-width:100%;max-height:320px;margin:14px auto 4px;border-radius:10px;border:4px solid #fff7ea;transform:rotate(-1.5deg);
-               box-shadow:0 10px 24px rgba(0,0,0,.35)}
-  .mailbox img.show{display:block}
+  .editor{display:none;margin-top:12px}
+  .editor.show{display:block}
+  .pcv{display:block;max-width:100%;max-height:380px;width:auto;height:auto;margin:6px auto 10px;border-radius:6px;border:4px solid #fff7ea;
+       box-shadow:0 10px 24px rgba(0,0,0,.35);touch-action:none;cursor:grab}
+  .elabel{font-family:"Pixelify Sans";font-size:12px;letter-spacing:1px;color:var(--muted);text-align:left;margin:10px 2px 6px}
+  .elabel span{letter-spacing:0;opacity:.8}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;font-family:"Pixelify Sans";font-size:13px;border:2px solid transparent;border-radius:20px;padding:6px 12px;cursor:pointer;
+        background:rgba(255,255,255,.1);color:var(--ink);display:flex;align-items:center;gap:6px}
+  .chip.on{border-color:var(--gold);background:rgba(242,193,78,.18)}
+  .chip canvas{width:22px;height:22px;image-rendering:pixelated}
+  .linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:13px;padding:4px;margin-top:2px}
   .mailbox .note{display:block;width:100%;margin:12px 0 0;font:inherit;font-size:16px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);
                  background:rgba(255,255,255,.08);color:var(--ink)}
   .mailbox .note::placeholder{color:#a9a1c4}
@@ -473,7 +483,14 @@
       <h3>📸 Lagi ngerasa cantik?</h3>
       <p>Kirim aja fotonya ke sini. Nggak usah alasan, nggak usah nunggu momen. Ngerasa cantik aja udah cukup jadi alasan.</p>
       <label class="pick" id="pickLabel"><input type="file" id="photoInput" accept="image/*"><span id="pickText">pilih foto</span></label>
-      <img id="photoPreview" alt="pratinjau foto yang dipilih">
+      <div class="editor" id="editor">
+        <canvas id="photoCanvas" class="pcv" aria-label="pratinjau foto"></canvas>
+        <div class="elabel">filter</div>
+        <div class="chips" id="filterChips"></div>
+        <div class="elabel">stiker <span>(tap buat nempel, geser pakai jari)</span></div>
+        <div class="chips" id="stickerChips"></div>
+        <button class="linkbtn" id="clearStk">hapus semua stiker</button>
+      </div>
       <input id="photoNote" class="note" maxlength="200" placeholder="mau titip pesan? (boleh kosong)" autocomplete="off">
       <button class="btn send" id="photoSend" disabled>kirim ke si pembawa lentera 🏮</button>
       <div class="mstatus" id="photoStatus"></div>
@@ -1378,37 +1395,117 @@ $('#envs').addEventListener('click',ev=>{
 // Isi dengan URL Worker setelah dipasang, mis. "https://kotak-pos-lentera.namamu.workers.dev"
 const WORKER_URL = "https://kotak-pos-lentera.horosphoibos.workers.dev/";
 (() => {
-  const input=$('#photoInput'), prev=$('#photoPreview'), send=$('#photoSend'), status=$('#photoStatus'), note=$('#photoNote');
-  let blob=null;
+  const input=$('#photoInput'), send=$('#photoSend'), status=$('#photoStatus'), note=$('#photoNote');
+  const editor=$('#editor'), out=$('#photoCanvas'), ox=out.getContext('2d');
   if(!WORKER_URL){ $('#kotakpos').style.display='none'; $('#kacaHint').style.display='none'; return; }
-  // perkecil foto (maks 1600px, JPEG) — sekalian membuang metadata seperti lokasi
-  async function shrink(file){
+
+  /* --- stiker pixel --- */
+  const SPAL={y:'#f2c14e',Y:'#ffe27a',r:'#c0392b',k:'#3a2a1a',p:'#ff7a9c',w:'#ffffff',b:'#fff2c2'};
+  const STK={
+    bulan:["...bbb...",".bbb.....","bbb......","bb.......","bb.......","bb.......","bbb......",".bbb.....","...bbb..."],
+    lentera:["...k...","..kkk..",".rrrrr.","rryyyrr","ryyYyyr","ryyyyyr","rryyyrr",".rrrrr.","..kkk..","...r..."],
+    hati:HEART,
+    bintang:["...Y...","...Y...","YYYYYYY",".YYYYY.","..YYY..",".YY.YY.","YY...YY"],
+    mahkota:["y...y...y","yy.yyy.yy","yyyyyyyyy","yryyYyyry","yyyyyyyyy"],
+    kilau:["..w..","..w..","wwwww","..w..","..w.."]
+  };
+  const STK_SP={}; for(const k in STK) STK_SP[k]=sprite(STK[k],{...SPAL,p:'#ff7a9c'},1);
+
+  /* --- filter (dihitung per piksel, jalan di semua browser) --- */
+  const FILTERS=[['asli','asli'],['pink','soft pink'],['retro','retro'],['bw','hitam putih'],['malam','malam bulan'],['polaroid','polaroid'],['pixel','pixel art']];
+  function makeFiltered(src,name){
+    const W=src.width,H=src.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+    if(name==='pixel'){const bs=Math.max(6,Math.round(W/70)),sm=document.createElement('canvas');sm.width=Math.ceil(W/bs);sm.height=Math.ceil(H/bs);
+      sm.getContext('2d').drawImage(src,0,0,sm.width,sm.height);x.imageSmoothingEnabled=false;x.drawImage(sm,0,0,W,H);}
+    else x.drawImage(src,0,0);
+    if(name==='asli')return c;
+    const d=x.getImageData(0,0,W,H),a=d.data;
+    for(let i=0,px=0;i<a.length;i+=4,px++){
+      let r=a[i],g=a[i+1],b=a[i+2];
+      const vx=(px%W)/W-0.5,vy=((px/W)|0)/H-0.5,vig=1-(vx*vx+vy*vy)*0.9;
+      if(name==='pink'){r=r*0.92+28;g=g*0.88+14;b=b*0.9+26;}
+      else if(name==='retro'){const sr=.393*r+.769*g+.189*b,sg=.349*r+.686*g+.168*b,sb=.272*r+.534*g+.131*b;
+        r=(r*0.45+sr*0.55)*0.85+22;g=(g*0.45+sg*0.55)*0.85+18;b=(b*0.45+sb*0.55)*0.85+12;r*=vig;g*=vig;b*=vig;}
+      else if(name==='bw'){let l=.299*r+.587*g+.114*b;l=(l-128)*1.15+128;r=g=b=l;}
+      else if(name==='malam'){r=r*0.78+10;g=g*0.84+14;b=b*1.04+36;}
+      else if(name==='polaroid'){r=((r-128)*1.12+128+12)*vig;g=((g-128)*1.1+128+4)*vig;b=((b-128)*1.06+128-6)*vig;}
+      else if(name==='pixel'){r=Math.round(r/42)*42;g=Math.round(g/42)*42;b=Math.round(b/42)*42;}
+      a[i]=r;a[i+1]=g;a[i+2]=b;
+    }
+    x.putImageData(d,0,0);return c;
+  }
+
+  /* --- frame ulos --- */
+  function ulosBand(x,W,y0,hgt){
+    const k=Math.max(2,Math.round(hgt/12));
+    const K='#141414',Rd='#8e1b1b',Wh='#efe6d6',G='#c9a227';
+    for(let col=0;col*k<W;col++)for(let row=0;row<12;row++){
+      let c;if(row===0||row===11)c=K;else if(row===1||row===10)c=Wh;else if(row===2||row===9)c=Rd;
+      else{const dx=Math.abs((col%8)-3.5),dy=Math.abs(row-5.5),dd=dx+dy;c=dd<1.5?G:dd<2.6?Wh:dd<3.6?K:Rd;}
+      x.fillStyle=c;x.fillRect(col*k,y0+row*k,k,k);}
+    return 12*k;
+  }
+
+  let base=null, cache={}, filter='asli', stickers=[], frame=false, drag=null;
+  function render(){
+    if(!base)return;
+    const W=base.width,H=base.height; out.width=W; out.height=H;
+    if(!cache[filter])cache[filter]=makeFiltered(base,filter);
+    ox.drawImage(cache[filter],0,0);
+    if(frame){const hgt=Math.round(W/22);ulosBand(ox,W,0,hgt);ulosBand(ox,W,H-12*Math.max(2,Math.round(hgt/12)),hgt);}
+    ox.imageSmoothingEnabled=false;
+    stickers.forEach(s=>{const sp=STK_SP[s.t];ox.drawImage(sp,s.x-sp.width*s.k/2,s.y-sp.height*s.k/2,sp.width*s.k,sp.height*s.k);});
+  }
+  function chips(){
+    $('#filterChips').innerHTML=FILTERS.map(([id,lbl])=>`<button class="chip ${id===filter?'on':''}" data-f="${id}">${lbl}</button>`).join('');
+    const sc=$('#stickerChips'); sc.innerHTML='';
+    Object.keys(STK).forEach(k=>{const b=document.createElement('button');b.className='chip';b.dataset.s=k;const cv=document.createElement('canvas');
+      const sp=STK_SP[k];cv.width=sp.width;cv.height=sp.height;cv.getContext('2d').drawImage(sp,0,0);b.append(cv,document.createTextNode(k));sc.append(b);});
+    const fb=document.createElement('button');fb.className='chip'+(frame?' on':'');fb.dataset.frame='1';fb.textContent='frame ulos';sc.append(fb);
+  }
+  $('#filterChips').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;filter=b.dataset.f;chips();render();});
+  $('#stickerChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!base)return;
+    if(b.dataset.frame){frame=!frame;chips();render();return;}
+    const sp=STK_SP[b.dataset.s],k=Math.max(2,Math.round(base.width/7/Math.max(sp.width,sp.height)));
+    const n=stickers.length;stickers.push({t:b.dataset.s,k,x:base.width*(0.3+((n*0.17)%0.45)),y:base.height*(0.3+((n*0.23)%0.45))});render();});
+  $('#clearStk').addEventListener('click',()=>{stickers=[];render();});
+
+  // geser stiker
+  const pos=e=>{const r=out.getBoundingClientRect();return[(e.clientX-r.left)/r.width*out.width,(e.clientY-r.top)/r.height*out.height];};
+  out.addEventListener('pointerdown',e=>{const[x,y]=pos(e);
+    for(let i=stickers.length-1;i>=0;i--){const s=stickers[i],sp=STK_SP[s.t],hw=sp.width*s.k/2+8,hh=sp.height*s.k/2+8;
+      if(Math.abs(x-s.x)<hw&&Math.abs(y-s.y)<hh){drag={s,dx:x-s.x,dy:y-s.y};stickers.push(stickers.splice(i,1)[0]);out.setPointerCapture(e.pointerId);e.preventDefault();return;}}});
+  out.addEventListener('pointermove',e=>{if(!drag)return;const[x,y]=pos(e);drag.s.x=x-drag.dx;drag.s.y=y-drag.dy;render();});
+  ['pointerup','pointercancel'].forEach(ev=>out.addEventListener(ev,()=>{drag=null;}));
+
+  // perkecil foto (maks 1600px) — sekalian membuang metadata seperti lokasi
+  async function load(file){
     let img;
     try{ img=await createImageBitmap(file,{imageOrientation:'from-image'}); }
     catch(e){ img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(file);}); }
     const s=Math.min(1,1600/Math.max(img.width,img.height)), cv=document.createElement('canvas');
     cv.width=Math.round(img.width*s); cv.height=Math.round(img.height*s);
-    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
-    return await new Promise(res=>cv.toBlob(res,'image/jpeg',0.86));
+    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height); return cv;
   }
   input.addEventListener('change',async()=>{
     const f=input.files&&input.files[0]; if(!f)return;
     status.textContent='lagi disiapin…'; send.disabled=true;
-    try{ blob=await shrink(f); prev.src=URL.createObjectURL(blob); prev.classList.add('show');
-         $('#pickText').textContent='ganti foto'; status.textContent='cantik. siap dikirim? ✨'; send.disabled=false; }
-    catch(e){ blob=null; status.textContent='Fotonya nggak kebaca. Coba foto lain ya.'; }
+    try{ base=await load(f); cache={}; filter='asli'; stickers=[]; frame=false; chips(); render(); editor.classList.add('show');
+         $('#pickText').textContent='ganti foto'; status.textContent='cantik. mau dikasih filter dulu? ✨'; send.disabled=false; }
+    catch(e){ base=null; status.textContent='Fotonya nggak kebaca. Coba foto lain ya.'; }
   });
   send.addEventListener('click',async()=>{
-    if(!blob)return;
+    if(!base)return;
     send.disabled=true; status.textContent='lagi dikirim lewat bulan… 🌙';
+    render(); const blob=await new Promise(res=>out.toBlob(res,'image/jpeg',0.88));
     const fd=new FormData(); fd.append('photo',blob,'foto.jpg'); fd.append('note',note.value.trim().slice(0,200));
     try{
       const r=await fetch(WORKER_URL,{method:'POST',body:fd}); const j=await r.json().catch(()=>({}));
       if(!r.ok||!j.ok) throw new Error(j.error||r.status);
       status.textContent='Terkirim! 💌 Si pembawa lentera pasti senyum-senyum sendiri.';
       toast('Terkirim ke si pembawa lentera 🏮');
-      blob=null; input.value=''; note.value=''; $('#pickText').textContent='kirim foto lain';
-      setTimeout(()=>prev.classList.remove('show'),2500);
+      base=null; cache={}; input.value=''; note.value=''; $('#pickText').textContent='kirim foto lain';
+      setTimeout(()=>editor.classList.remove('show'),2500);
     }catch(e){ status.textContent='Yah, gagal kirim. Coba lagi sebentar ya.'; send.disabled=false; }
   });
 })();
