@@ -25,6 +25,10 @@
 
   /* hero */
   .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;color:#2a1b3d;padding:40px 0}
+  .hero .visit{font-size:14px;opacity:.8;margin-top:6px;min-height:1em}
+  .hero h1{cursor:default;-webkit-user-select:none;user-select:none}
+  .heart-rain{position:fixed;top:-40px;z-index:40;pointer-events:none;font-size:22px;animation:rain linear forwards}
+  @keyframes rain{to{transform:translateY(110vh) rotate(25deg);opacity:.2}}
   .hero h1{font-family:"Pixelify Sans",monospace;font-weight:600;font-size:clamp(44px,13vw,72px);line-height:1;margin:18px 0 10px;letter-spacing:1px}
   .hero p{margin:4px 0;max-width:30ch}
   .hero .greet{margin-top:18px;font-weight:700}
@@ -75,6 +79,17 @@
   .mailbox .send{margin-top:16px}
   .mailbox .send:disabled{opacity:.45;cursor:default}
   .mstatus{min-height:1.6em;margin-top:12px;font-weight:700;color:#fff2c2}
+  .miss{text-align:center;margin:18px 0 6px;min-height:84px}
+  .miss-word{font-size:clamp(24px,7vw,32px);font-weight:700;color:#fff2c2;transition:opacity .6s,transform .6s;line-height:1.3}
+  .miss-where{font-size:13px;color:var(--muted);margin-top:4px;transition:opacity .6s}
+  .miss.fade .miss-word,.miss.fade .miss-where{opacity:0;transform:translateY(6px)}
+  .kangen{text-align:center}
+  .kangen h3{font-family:"Pixelify Sans";font-size:24px;margin:0 0 4px}
+  .kbtn{font-size:46px;line-height:1;border:0;cursor:pointer;background:rgba(255,159,180,.15);width:96px;height:96px;border-radius:50%;margin-top:10px;
+        box-shadow:0 0 0 0 rgba(255,122,156,.5);animation:beat 1.6s ease-in-out infinite;transition:transform .15s}
+  .kbtn:active{transform:scale(.9)}
+  .kbtn:disabled{animation:none;opacity:.6;cursor:default}
+  @keyframes beat{0%,100%{box-shadow:0 0 0 0 rgba(255,122,156,.45)}15%{transform:scale(1.08)}30%{transform:scale(1)}50%{box-shadow:0 0 0 18px rgba(255,122,156,0)}}
   .mailbox .fine{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.5}
   .dream-cta{text-align:center;margin:40px 0 10px;color:var(--muted)}
   .dream-cta p{margin:0}
@@ -220,6 +235,7 @@
     <h1>Sebelum Tidur</h1>
     <p>cerita pendek, buat dibaca pelan-pelan</p>
     <p class="greet" id="greet"></p>
+    <p class="visit" id="visit"></p>
     <button class="btn" id="startMusic">♪ nyalakan musik dulu</button>
     <div class="scrollhint">scroll pelan-pelan ↓</div>
   </section>
@@ -416,6 +432,11 @@
     <p class="reveal" style="text-align:center;color:var(--muted);margin-top:50px">Lihat ke atas sebentar.</p>
     <canvas class="px" id="sConst" width="200" height="72" style="margin:10px 0"></canvas>
 
+    <div class="miss reveal" id="miss" aria-live="polite">
+      <div class="miss-word" id="missWord">aku kangen kamu</div>
+      <div class="miss-where" id="missWhere">— dalam bahasa Indonesia</div>
+    </div>
+
     <div class="ending reveal">
       <h2>Selamat tidur.</h2>
       <p>dari bulan,</p>
@@ -449,6 +470,14 @@
       <button class="btn send" id="photoSend" disabled>kirim ke si pembawa lentera 🏮</button>
       <div class="mstatus" id="photoStatus"></div>
       <p class="fine">cuma si pembawa lentera yang lihat 🏮</p>
+    </div>
+
+    <div class="card reveal kangen" id="kangenBox">
+      <h3>Lagi kangen?</h3>
+      <p>Nggak usah ngetik apa-apa. Tap aja.</p>
+      <button class="kbtn" id="kangenBtn" aria-label="kirim kangen">💗</button>
+      <div class="mstatus" id="kangenStatus"></div>
+      <p class="fine">bulan bakal nyampein ke si pembawa lentera 🏮</p>
     </div>
   </section>
 
@@ -769,6 +798,22 @@ scene('sMirror',(s,t)=>{
   b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),250);
 });
 
+/* Fase bulan asli malam ini (perkiraan dari siklus sinodik 29,53 hari) */
+const MOON=(()=>{
+  const SYN=29.530588853, ref=Date.UTC(2000,0,6,18,14);       // bulan baru acuan
+  const days=(Date.now()-ref)/86400000, p=((days/SYN)%1+1)%1;   // 0 = bulan baru, 0.5 = purnama
+  const illum=Math.round((1-Math.cos(2*Math.PI*p))/2*100);
+  const name= p<0.03||p>0.97?'bulan baru' : p<0.22?'bulan sabit' : p<0.28?'bulan separuh' : p<0.47?'bulan cembung'
+            : p<0.53?'bulan purnama' : p<0.72?'bulan cembung' : p<0.78?'bulan separuh':'bulan sabit';
+  const r=10, cv=document.createElement('canvas'); cv.width=cv.height=r*2+1; const x=cv.getContext('2d');
+  for(let dy=-r;dy<=r;dy++){const w=Math.sqrt(r*r-dy*dy);for(let dx=-r;dx<=r;dx++){ if(dx*dx+dy*dy>r*r)continue;
+    const lit = p<0.5 ? dx> w*Math.cos(2*Math.PI*p) : dx< -w*Math.cos(2*Math.PI*p);
+    x.fillStyle= lit?'#fff2c2':'#3a4072'; x.fillRect(dx+r,dy+r,1,1);}}
+  // kawah, hanya di bagian yang terang
+  [[-5,-6,3,2],[4,4,3,2],[5,-4,2,2]].forEach(([dx,dy,w,h])=>{const d=x.getImageData(dx+r,dy+r,1,1).data;if(d[0]>200){x.fillStyle='#ecd9a0';x.fillRect(dx+r,dy+r,w,h);}});
+  return {p,illum,name,sprite:cv};
+})();
+
 /* Bab 2: kamar + bulan */
 const lateNight = hour>=23||hour<4;
 const moonLines=[
@@ -777,7 +822,8 @@ const moonLines=[
   "Tahu nggak? Suara yang sabar itu langka. Kamu punya.",
   "Cepat, ada bintang jatuh! Bikin permohonan 🌠",
   "Aku bulan. Tugasku nemenin orang yang belum bisa tidur. Malam ini giliran kamu.",
-  "Ssst, ada yang nitip salam. Katanya kamu jangan begadang."
+  "Ssst, ada yang nitip salam. Katanya kamu jangan begadang.",
+  "Coba deh nanti lihat ke luar jendela. Itu aku, bentuknya sama persis kayak di gambar ini. Dan bisa jadi, ada orang lain yang lagi lihat aku juga, sambil mikirin kamu."
 ];
 let moonIdx=0, moonTapT=-9, shootT=-9;
 const roomStars=(()=>{const r=rnd(7);return Array.from({length:22},()=>[16+r()*60,10+r()*46,r()*6]);})();
@@ -794,8 +840,8 @@ const sRoom=scene('sRoom',(s,t)=>{
   const sp=(t-shootT)/1.2; if(sp>=0&&sp<1){for(let k=0;k<8;k++){c.globalAlpha=(1-k/8)*(1-sp);R(c,70-sp*50+k*2,14+sp*20-k,1,1,'#fff');}c.globalAlpha=1;}
   const shake=(t-moonTapT)<0.4?Math.round(Math.sin((t-moonTapT)*60)):0;
   const mx=48+shake,my=30;
-  disc(c,mx,my,13,'rgba(255,242,194,0.12)');
-  disc(c,mx,my,10,'#fff2c2');R(c,mx-5,my-6,3,2,'#ecd9a0');R(c,mx+4,my+4,3,2,'#ecd9a0');R(c,mx+5,my-4,2,2,'#ecd9a0');
+  disc(c,mx,my,13,`rgba(255,242,194,${0.04+MOON.illum/100*0.1})`);
+  c.drawImage(MOON.sprite,mx-10,my-10);
   const talking=(t-moonTapT)<2.2&&Math.floor(t*6)%2===0;
   R(c,mx-5,my-1,2,1,'#5a4a3a');R(c,mx+3,my-1,2,1,'#5a4a3a');
   R(c,mx-6,my+1,2,1,'#f6b0a0');R(c,mx+4,my+1,2,1,'#f6b0a0');
@@ -834,7 +880,8 @@ const sRoom=scene('sRoom',(s,t)=>{
     const b=$('#moonBubble');b.textContent="🌙 "+line;b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),250);
   }
 });
-$('#moonBubble').textContent = lateNight ? "🌙 (bulannya kelihatan agak cemberut. tap aja)" : "🌙 (bulannya kayak lagi nunggu disapa. tap aja)";
+$('#moonBubble').textContent = `🌙 Bentuk bulan di jendela itu sama kayak bulan di langitmu malam ini: ${MOON.name}, sekitar ${MOON.illum}% terang. ` +
+  (lateNight ? "(dan dia kelihatan agak cemberut. tap aja)" : "(dia lagi nunggu disapa. tap aja)");
 
 /* Bab 2b: persimpangan */
 const quiz={answered:0,yes:0};
@@ -1383,6 +1430,8 @@ const replies=[
   [/mimpi|piala|juara|sertifikat/,"Mimpinya disimpan bulan. Pialanya beneran kok, cuma belum dikirim aja 🏆"],
   [/kaca|cantik|centil|manis|alis/,"Bulan konfirmasi: kacanya jujur. Cantik, manis, centil dikit. Pas 💖"],
   [/mama|bipo|inang/,"Bintang yang paling terang malam ini kayaknya lagi senyum 🤍"],
+  [/haholongan|holong/,"Holong… 🤍 Bulan nggak berani jawab yang itu. Tapi ada yang bawa lentera, mungkin dia bisa 🤭"],
+  [/kangen|rindu|miss/,"Kangen itu wajar. Bilang aja ke orangnya. Kalau belum berani, ada tombol 💗 di halaman paling bawah."],
   [/dipasu|pasu-pasu|pasu pasu/,"Amin! Di GKPS juga ya nanti. Bulan diundang nggak? 🤭"],
   [/utte|mukkur/,"Utte mukkur lebih ampuh dari dating app, katanya 🍋 bulan nggak ikut-ikutan ya."],
   [/singapur|singapore/,"Pernah. Mau lagi? ENGGA. 😂 Bulan setuju, mending ke Fiji."],
@@ -1507,6 +1556,92 @@ $('#music').onclick=()=>setMusic(!playing);
 addEventListener('pointerdown',()=>{if(playing&&actx&&actx.state!=='running'){actx.resume();unlockIOS(true);}},{passive:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&playing&&actx&&actx.state!=='running')actx.resume();});
 $('#startMusic').onclick=()=>setMusic(!playing);
+
+/* ---------- hal-hal kecil yang bikin "lho, kok bisa?" ---------- */
+// 1. ingat kunjungan
+(() => {
+  const n=store.get('st_visits',0)+1, last=store.get('st_last',0); store.set('st_visits',n); store.set('st_last',Date.now());
+  if(n<2)return;
+  const gap=last?Math.floor((Date.now()-last)/86400000):0;
+  const when=gap>=2?` Terakhir mampir ${gap} hari lalu. Kangen ya? 🤭`:gap===1?' Kemarin juga ke sini ya 😄':'';
+  const lines={2:'Balik lagi? 🥹',3:'Kunjungan ketiga. Bulan mulai hafal kamu.',5:'Lima kali! Ini udah jadi rutinitas sebelum tidur ya?',10:'Sepuluh kali. Bulan terharu 🥲'};
+  $('#visit').textContent=(lines[n]||`Ini kunjunganmu yang ke-${n}.`)+when;
+})();
+// 2. judul tab "ngambek" kalau ditinggal
+(() => {
+  const base=document.title; let tm;
+  document.addEventListener('visibilitychange',()=>{clearTimeout(tm);
+    if(document.hidden)document.title='🌙 jangan lama-lama…';
+    else{document.title='🥹 yay, balik lagi';tm=setTimeout(()=>document.title=base,2500);}});
+})();
+// 3. jam kembar (11:11, 22:22, …)
+(() => {
+  let shown='';
+  const check=()=>{const d=new Date(),h=d.getHours(),m=d.getMinutes(),k=h+':'+m;
+    if((h===m||(h===0&&m===0))&&shown!==k){shown=k;const hh=String(h).padStart(2,'0');toast(`🌠 ${hh}:${hh}, jam kembar! Cepat bikin permohonan`);shootT=performance.now()/1000;}};
+  check(); setInterval(check,15000);
+})();
+// 4. kalau ada yang di-copy
+document.addEventListener('copy',()=>toast('dicopy buat siapa hayo 👀'));
+// 5. diam lama → ketiduran?
+(() => {
+  let last=Date.now(), told=false;
+  ['scroll','pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{last=Date.now();told=false;},{passive:true}));
+  setInterval(()=>{if(!told&&!document.hidden&&Date.now()-last>90000){told=true;toast('masih di sini? jangan-jangan ketiduran 😴');}},5000);
+})();
+// 6. HP dimiringin
+(() => {
+  if(!('ontouchstart' in window))return;
+  const mq=matchMedia('(orientation: landscape)'); let n=0;
+  const on=()=>{if(mq.matches)toast(++n>1?'dimiringin lagi 😆 nyari angle ya?':'eh, HP-nya dimiringin. mau rebahan ya? 😄');};
+  mq.addEventListener?mq.addEventListener('change',on):mq.addListener(on);
+})();
+// 7. tap judul 5x → hujan hati
+(() => {
+  let taps=[];
+  $('.hero h1').addEventListener('click',()=>{
+    const now=Date.now(); taps=taps.filter(t=>now-t<2000); taps.push(now);
+    if(taps.length<5)return; taps=[];
+    const hearts=['❤️','💖','💗','💕','🤍','💛'];
+    for(let i=0;i<36;i++){const h=document.createElement('span');h.className='heart-rain';h.textContent=hearts[i%hearts.length];
+      h.style.left=Math.random()*100+'vw';h.style.animationDuration=(2.5+Math.random()*2.5)+'s';h.style.animationDelay=(Math.random()*1.2)+'s';h.style.fontSize=(16+Math.random()*18)+'px';
+      document.body.appendChild(h);setTimeout(()=>h.remove(),6500);}
+    toast('ketahuan suka iseng 💖');
+  });
+})();
+
+// 8. "kangen" dalam bahasa tempat-tempat yang pernah & mau dia datangi
+(() => {
+  const W=[
+    ["aku kangen kamu","— dalam bahasa Indonesia"],
+    ["I miss you","— kalau lagi di Singapura"],
+    ["我想你","— juga di Singapura"],
+    ["Aku rindu awak","— kalau lagi di Malaysia"],
+    ["คิดถึงนะ","— kalau lagi di Thailand"],
+    ["Anh nhớ em","— kalau lagi di Vietnam"],
+    ["وحشتيني","— kalau nanti di Mesir"],
+    ["holong 🤍","— kata orang Batak, buat yang disayang"]
+  ];
+  const box=$('#miss'),w=$('#missWord'),wh=$('#missWhere'); let i=0, timer=null;
+  const step=()=>{box.classList.add('fade');setTimeout(()=>{i=(i+1)%W.length;w.textContent=W[i][0];wh.textContent=W[i][1];
+    w.dir=/[؀-ۿ]/.test(W[i][0])?'rtl':'ltr';box.classList.remove('fade');},600);};
+  new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&!timer)timer=setInterval(step,2800);else if(!e.isIntersecting&&timer){clearInterval(timer);timer=null;}})).observe(box);
+})();
+// 9. tombol kangen
+(() => {
+  const btn=$('#kangenBtn'),st=$('#kangenStatus');
+  if(!WORKER_URL){$('#kangenBox').style.display='none';return;}
+  const replies=["Kangennya udah dikirim lewat bulan 🌙","Sampai! Di seberang sana kayaknya ada yang senyum 🤭","Udah nyampe. Katanya: kangen juga 🤍"];
+  let n=0;
+  btn.addEventListener('click',async()=>{
+    btn.disabled=true; st.textContent='lagi dibawa bulan…';
+    const fd=new FormData(); fd.append('message','💗 Dia barusan tap tombol kangen.');
+    try{const r=await fetch(WORKER_URL,{method:'POST',body:fd});const j=await r.json().catch(()=>({}));
+      if(!r.ok||!j.ok)throw 0; st.textContent=replies[n++%replies.length]; toast('💗 terkirim');}
+    catch(e){st.textContent='Belum kekirim. Coba tap lagi sebentar ya.';}
+    setTimeout(()=>{btn.disabled=false;},20000);
+  });
+})();
 
 /* ---------- untuk yang iseng buka console ---------- */
 console.log("%c✦ hai, yang suka ngintip console.\n%cnamanya nggak pernah ditulis di sini.\nTapi bintang-bintang di bab terakhir tahu.","font:16px monospace;color:#f2c14e","font:13px monospace;color:#9a90c0");
