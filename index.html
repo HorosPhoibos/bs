@@ -77,19 +77,27 @@
   .mailbox .pick{display:inline-block;margin:10px 0 4px;cursor:pointer;font-family:"Pixelify Sans";font-size:16px;color:#2a1b3d;background:#fff7ea;
                  padding:10px 18px;border-radius:30px;box-shadow:0 4px 0 #bdb3d6}
   .mailbox .pick input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-  .editor{display:none;margin-top:12px}
-  .editor.show{display:block}
-  .pcv{display:block;max-width:100%;max-height:380px;width:auto;height:auto;margin:6px auto 10px;border-radius:6px;border:4px solid #fff7ea;
-       box-shadow:0 10px 24px rgba(0,0,0,.35);touch-action:none;cursor:grab}
+  [hidden]{display:none!important}
+  .bstage{position:relative;margin:12px auto 10px;border-radius:10px;overflow:hidden;background:rgba(0,0,0,.25);border:4px solid #fff7ea;
+          box-shadow:0 10px 24px rgba(0,0,0,.35);min-height:150px;display:flex;align-items:center;justify-content:center;max-width:380px}
+  .bempty{padding:40px 16px;color:var(--muted);font-size:14px}
+  #bcv{display:none;width:100%;height:auto}
+  #bvideo{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+  #bcount{position:absolute;inset:0;display:grid;place-items:center;font-family:"Pixelify Sans";font-size:96px;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.35);pointer-events:none}
+  #bflash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+  .brow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+  .brow .btn{margin-top:0}
+  .btn.alt{background:#fff7ea;box-shadow:0 4px 0 #bdb3d6,0 0 0 3px #2a1b3d}
+  .mailbox .pick{margin:0}
+  .bhint{min-height:1.4em;font-size:13px;color:var(--muted);margin-top:6px}
+  #bimg{display:block;max-width:100%;max-height:460px;margin:12px auto 4px;border-radius:6px;box-shadow:0 10px 24px rgba(0,0,0,.35)}
   .elabel{font-family:"Pixelify Sans";font-size:12px;letter-spacing:1px;color:var(--muted);text-align:left;margin:10px 2px 6px}
-  .elabel span{letter-spacing:0;opacity:.8}
   .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .chips::-webkit-scrollbar{display:none}
   .chip{flex:none;font-family:"Pixelify Sans";font-size:13px;border:2px solid transparent;border-radius:20px;padding:6px 12px;cursor:pointer;
-        background:rgba(255,255,255,.1);color:var(--ink);display:flex;align-items:center;gap:6px}
+        background:rgba(255,255,255,.1);color:var(--ink)}
   .chip.on{border-color:var(--gold);background:rgba(242,193,78,.18)}
-  .chip canvas{width:22px;height:22px;image-rendering:pixelated}
-  .linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:13px;padding:4px;margin-top:2px}
+  .linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:13px;padding:4px;margin-top:8px}
   .mailbox .note{display:block;width:100%;margin:12px 0 0;font:inherit;font-size:16px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);
                  background:rgba(255,255,255,.08);color:var(--ink)}
   .mailbox .note::placeholder{color:#a9a1c4}
@@ -480,21 +488,41 @@
     <p class="reveal" style="text-align:center;color:var(--muted);font-size:14px;margin-top:18px">🏮 lentera ditemukan: <b id="lanternCount">0</b>/8</p>
 
     <div class="card reveal mailbox" id="kotakpos">
-      <h3>📸 Lagi ngerasa cantik?</h3>
-      <p>Kirim aja fotonya ke sini. Nggak usah alasan, nggak usah nunggu momen. Ngerasa cantik aja udah cukup jadi alasan.</p>
-      <label class="pick" id="pickLabel"><input type="file" id="photoInput" accept="image/*"><span id="pickText">pilih foto</span></label>
-      <div class="editor" id="editor">
-        <canvas id="photoCanvas" class="pcv" aria-label="pratinjau foto"></canvas>
-        <div class="elabel">filter</div>
-        <div class="chips" id="filterChips"></div>
-        <div class="elabel">stiker <span>(tap buat nempel, geser pakai jari)</span></div>
-        <div class="chips" id="stickerChips"></div>
-        <button class="linkbtn" id="clearStk">hapus semua stiker</button>
+      <h3>📸 Photobooth Lentera</h3>
+      <p>Lagi ngerasa cantik? Foto dulu. Filternya banyak, stikernya nempel di muka, bisa juga bikin photostrip 4×.</p>
+      <div class="bstage" id="bstage">
+        <div class="bempty" id="bempty">buka kamera atau pilih foto dari galeri ✨</div>
+        <canvas id="bcv"></canvas>
+        <div id="bcount"></div><div id="bflash"></div>
       </div>
-      <input id="photoNote" class="note" maxlength="200" placeholder="mau titip pesan? (boleh kosong)" autocomplete="off">
-      <button class="btn send" id="photoSend" disabled>kirim ke si pembawa lentera 🏮</button>
-      <div class="mstatus" id="photoStatus"></div>
-      <p class="fine">cuma si pembawa lentera yang lihat 🏮</p>
+      <video id="bvideo" playsinline muted></video>
+      <div class="brow" id="bstart">
+        <button class="btn" id="bcam">📷 buka kamera</button>
+        <label class="pick">🖼️ dari galeri<input type="file" id="bfile" accept="image/*"></label>
+      </div>
+      <div id="blive" hidden>
+        <div class="elabel">filter</div><div class="chips" id="bfil"></div>
+        <div class="elabel">stiker wajah</div><div class="chips" id="bstk"></div>
+        <div class="bhint" id="bface"></div>
+        <div class="brow">
+          <button class="btn" id="bsnap">📸 1 foto</button>
+          <button class="btn alt" id="bstrip">🎞️ photostrip 4×</button>
+        </div>
+        <button class="linkbtn" id="bback">↺ ganti kamera / foto</button>
+      </div>
+      <div id="bresult" hidden>
+        <img id="bimg" alt="hasil foto">
+        <input id="photoNote" class="note" maxlength="200" placeholder="tulis caption / titip pesan (boleh kosong)" autocomplete="off">
+        <div class="brow">
+          <button class="btn send" id="photoSend">kirim ke si pembawa lentera 🏮</button>
+        </div>
+        <div class="brow">
+          <button class="btn alt" id="bsave">⬇️ simpan</button>
+          <button class="btn alt" id="bagain">↺ foto lagi</button>
+        </div>
+        <div class="mstatus" id="photoStatus"></div>
+      </div>
+      <p class="fine" id="bfine">cuma si pembawa lentera yang lihat 🏮 · simpan = cuma ke HP kamu</p>
     </div>
 
     <div class="card reveal kangen" id="kangenBox">
@@ -1394,120 +1422,218 @@ $('#envs').addEventListener('click',ev=>{
 /* ---------- kotak pos lentera (foto -> Cloudflare Worker -> Telegram) ---------- */
 // Isi dengan URL Worker setelah dipasang, mis. "https://kotak-pos-lentera.namamu.workers.dev"
 const WORKER_URL = "https://kotak-pos-lentera.horosphoibos.workers.dev/";
+/* ---------- photobooth lentera (kamera langsung / galeri → filter + stiker wajah → kirim/simpan) ---------- */
 (() => {
-  const input=$('#photoInput'), send=$('#photoSend'), status=$('#photoStatus'), note=$('#photoNote');
-  const editor=$('#editor'), out=$('#photoCanvas'), ox=out.getContext('2d');
-  if(!WORKER_URL){ $('#kotakpos').style.display='none'; $('#kacaHint').style.display='none'; return; }
+  const bcv=$('#bcv'), bx=bcv.getContext('2d',{willReadFrequently:true}), video=$('#bvideo');
+  const status=$('#photoStatus'), note=$('#photoNote'), send=$('#photoSend');
+  if(!WORKER_URL){ send.style.display='none'; $('#bfine').textContent='simpan = cuma ke HP kamu'; $('#kacaHint').style.display='none'; }
 
-  /* --- stiker pixel --- */
-  const SPAL={y:'#f2c14e',Y:'#ffe27a',r:'#c0392b',k:'#3a2a1a',p:'#ff7a9c',w:'#ffffff',b:'#fff2c2'};
-  const STK={
-    bulan:["...bbb...",".bbb.....","bbb......","bb.......","bb.......","bb.......","bbb......",".bbb.....","...bbb..."],
-    lentera:["...k...","..kkk..",".rrrrr.","rryyyrr","ryyYyyr","ryyyyyr","rryyyrr",".rrrrr.","..kkk..","...r..."],
-    hati:HEART,
-    bintang:["...Y...","...Y...","YYYYYYY",".YYYYY.","..YYY..",".YY.YY.","YY...YY"],
-    mahkota:["y...y...y","yy.yyy.yy","yyyyyyyyy","yryyYyyry","yyyyyyyyy"],
-    kilau:["..w..","..w..","wwwww","..w..","..w.."]
-  };
-  const STK_SP={}; for(const k in STK) STK_SP[k]=sprite(STK[k],{...SPAL,p:'#ff7a9c'},1);
+  const FILTERS={asli:'asli',pink:'🌸 soft pink',retro:'📼 retro',bw:'🎞️ hitam putih',malam:'🌙 malam bulan',polaroid:'📷 polaroid',pixel:'👾 pixel'};
+  const STICKERS={none:'tanpa',headset:'🎧 headset CS',rol:'🎀 rol rambut',mahkota:'👑 mahkota',blush:'😊 blush',lentera:'🏮 lentera',bintang:'✨ bintang'};
+  if(NATAL) STICKERS.santa='🎅 topi Natal';
+  let fil='pink', stk=NATAL?'santa':'mahkota', stream=null, landmarker=null, lmLoading=false, liveOn=false, lastFace=null, mode='cam', upImg=null, upFace=null;
 
-  /* --- filter (dihitung per piksel, jalan di semua browser) --- */
-  const FILTERS=[['asli','asli'],['pink','soft pink'],['retro','retro'],['bw','hitam putih'],['malam','malam bulan'],['polaroid','polaroid'],['pixel','pixel art']];
-  function makeFiltered(src,name){
-    const W=src.width,H=src.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
-    if(name==='pixel'){const bs=Math.max(6,Math.round(W/70)),sm=document.createElement('canvas');sm.width=Math.ceil(W/bs);sm.height=Math.ceil(H/bs);
-      sm.getContext('2d').drawImage(src,0,0,sm.width,sm.height);x.imageSmoothingEnabled=false;x.drawImage(sm,0,0,W,H);}
-    else x.drawImage(src,0,0);
-    if(name==='asli')return c;
-    const d=x.getImageData(0,0,W,H),a=d.data;
+  function chips(box,obj,get,set){
+    const el=$(box); el.innerHTML='';
+    Object.entries(obj).forEach(([k,v])=>{const b=document.createElement('button');b.className='chip'+(get()===k?' on':'');b.textContent=v;
+      b.onclick=()=>{set(k);[...el.children].forEach(c=>c.classList.toggle('on',c===b));if(mode==='up')renderUpload();};el.appendChild(b);});
+  }
+  chips('#bfil',FILTERS,()=>fil,v=>fil=v);
+  chips('#bstk',STICKERS,()=>stk,v=>stk=v);
+
+  /* filter per piksel (jalan di semua browser) */
+  function applyFilter(ctx,w,h,f){
+    if(f==='asli')return;
+    const d=ctx.getImageData(0,0,w,h),a=d.data;
     for(let i=0,px=0;i<a.length;i+=4,px++){
-      let r=a[i],g=a[i+1],b=a[i+2];
-      const vx=(px%W)/W-0.5,vy=((px/W)|0)/H-0.5,vig=1-(vx*vx+vy*vy)*0.9;
-      if(name==='pink'){r=r*0.92+28;g=g*0.88+14;b=b*0.9+26;}
-      else if(name==='retro'){const sr=.393*r+.769*g+.189*b,sg=.349*r+.686*g+.168*b,sb=.272*r+.534*g+.131*b;
-        r=(r*0.45+sr*0.55)*0.85+22;g=(g*0.45+sg*0.55)*0.85+18;b=(b*0.45+sb*0.55)*0.85+12;r*=vig;g*=vig;b*=vig;}
-      else if(name==='bw'){let l=.299*r+.587*g+.114*b;l=(l-128)*1.15+128;r=g=b=l;}
-      else if(name==='malam'){r=r*0.78+10;g=g*0.84+14;b=b*1.04+36;}
-      else if(name==='polaroid'){r=((r-128)*1.12+128+12)*vig;g=((g-128)*1.1+128+4)*vig;b=((b-128)*1.06+128-6)*vig;}
-      else if(name==='pixel'){r=Math.round(r/42)*42;g=Math.round(g/42)*42;b=Math.round(b/42)*42;}
+      let r=a[i],g=a[i+1],b=a[i+2],l;
+      const vx=(px%w)/w-.5,vy=((px/w)|0)/h-.5,vig=1-(vx*vx+vy*vy)*.9;
+      switch(f){
+        case 'pink': r=r*.9+30;g=g*.85+15;b=b*.9+30;break;
+        case 'retro':{const sr=.393*r+.769*g+.189*b,sg=.349*r+.686*g+.168*b,sb=.272*r+.534*g+.131*b;
+          r=((r*.45+sr*.55)*.85+22)*vig;g=((g*.45+sg*.55)*.85+18)*vig;b=((b*.45+sb*.55)*.85+12)*vig;break;}
+        case 'bw': l=.299*r+.587*g+.114*b;l=(l-128)*1.18+128;r=g=b=l;break;
+        case 'malam': r=r*.78+10;g=g*.84+14;b=b*1.04+36;break;
+        case 'polaroid': r=((r-128)*1.12+140)*vig;g=((g-128)*1.1+132)*vig;b=((b-128)*1.06+122)*vig;break;
+        case 'pixel': r=Math.round(r/42)*42;g=Math.round(g/42)*42;b=Math.round(b/42)*42;break;
+      }
       a[i]=r;a[i+1]=g;a[i+2]=b;
     }
-    x.putImageData(d,0,0);return c;
+    ctx.putImageData(d,0,0);
+    if(f==='pink'){const gr=ctx.createRadialGradient(0,0,0,0,0,w*.9);gr.addColorStop(0,'rgba(255,150,200,.3)');gr.addColorStop(1,'rgba(255,150,200,0)');ctx.fillStyle=gr;ctx.fillRect(0,0,w,h);}
+    if(f==='malam'){ctx.fillStyle='#fff7d0';for(let i=0;i<14;i++){const x=((i*97)%100)/100*w,y=((i*37)%100)/100*h*.45,s=Math.max(2,w*.006);ctx.fillRect(x,y,s,s);}}
+  }
+  // gambar sumber memenuhi kanvas (cover), opsional dicerminkan (kamera depan)
+  function drawSource(ctx,src,sw,sh,w,h,mirror,f){
+    const k=Math.max(w/sw,h/sh),dw=sw*k,dh=sh*k,ox=(w-dw)/2,oy=(h-dh)/2;
+    ctx.save(); if(mirror){ctx.translate(w,0);ctx.scale(-1,1);}
+    if(f==='pixel'){const s=Math.max(2,Math.round(w/80)),t=document.createElement('canvas');t.width=Math.ceil(w/s);t.height=Math.ceil(h/s);
+      t.getContext('2d').drawImage(src,ox/s,oy/s,dw/s,dh/s);ctx.imageSmoothingEnabled=false;ctx.drawImage(t,0,0,t.width*s,t.height*s);ctx.imageSmoothingEnabled=true;}
+    else ctx.drawImage(src,ox,oy,dw,dh);
+    ctx.restore(); applyFilter(ctx,w,h,f);
+    return {ox,oy,dw,dh};
+  }
+  // titik-titik wajah (indeks landmark MediaPipe FaceMesh)
+  function facePts(lm,map,w,mirror){
+    const P=i=>{let x=map.ox+lm[i].x*map.dw,y=map.oy+lm[i].y*map.dh;if(mirror)x=w-x;return{x,y};};
+    const L=P(234),R=P(454),top=P(10),chin=P(152),eL=P(33),eR=P(263),cL=P(50),cR=P(280),mouth=P(13);
+    // kalau dicerminkan, mata "kanan" pindah ke kiri layar — pakai urutan kiri→kanan di layar supaya stiker tidak terbalik
+    const a=eL.x<=eR.x?eL:eR, b=eL.x<=eR.x?eR:eL;
+    return {L,R,top,chin,eL,eR,cL,cR,mouth,fw:Math.hypot(R.x-L.x,R.y-L.y),ang:Math.atan2(b.y-a.y,b.x-a.x)};
+  }
+  function px(ctx,rows,pal,cx,cy,u){const h=rows.length,w=rows[0].length;rows.forEach((r,j)=>[...r].forEach((k,i)=>{if(k!=='.'&&pal[k]){ctx.fillStyle=pal[k];ctx.fillRect(cx+(i-w/2)*u,cy+(j-h/2)*u,u+.5,u+.5);}}));}
+  const LANTERN=["..k..",".rrr.","ryyyr","ryYyr","ryyyr",".rrr.","..k.."];
+  const STAR=["..y..","..y..","yyyyy","..y..","..y.."];
+  function drawSticker(ctx,f,t){
+    if(!f||stk==='none')return;
+    const u=f.fw/22; ctx.save();
+    if(stk==='headset'){
+      ctx.translate((f.L.x+f.R.x)/2,(f.L.y+f.R.y)/2); ctx.rotate(f.ang);
+      ctx.strokeStyle='#3a3d4e'; ctx.lineWidth=u*1.6; ctx.beginPath(); ctx.ellipse(0,-f.fw*.05,f.fw*.56,f.fw*.62,0,Math.PI*1.05,Math.PI*1.95); ctx.stroke();
+      [-1,1].forEach(sd=>{ctx.fillStyle='#2b2e3b';ctx.fillRect(sd*f.fw*.54-u*2,-u*3,u*4,u*6);ctx.fillStyle='#2453a8';ctx.fillRect(sd*f.fw*.54-u*1.2,-u*2,u*2.4,u*4);});
+      ctx.restore(); ctx.save();
+      // mikrofon ke arah mulut
+      ctx.strokeStyle='#3a3d4e'; ctx.lineWidth=u*.9; ctx.beginPath(); ctx.moveTo(f.L.x,f.L.y); ctx.quadraticCurveTo(f.L.x+(f.mouth.x-f.L.x)*.3,f.mouth.y+u*3,f.mouth.x-f.fw*.12,f.mouth.y+u*1.5); ctx.stroke();
+      ctx.fillStyle='#2b2e3b'; ctx.beginPath(); ctx.arc(f.mouth.x-f.fw*.12,f.mouth.y+u*1.5,u*1.4,0,7); ctx.fill();
+    } else if(stk==='rol'){
+      ctx.translate(f.top.x,f.top.y); ctx.rotate(f.ang);
+      px(ctx,["pppppppp","pPpPpPpP","pppppppp","pPpPpPpP","pppppppp"],{p:'#ff9fb4',P:'#e27a92'},0,f.fw*.05,u*1.3);
+    } else if(stk==='mahkota'){
+      ctx.translate(f.top.x,f.top.y); ctx.rotate(f.ang);
+      px(ctx,["y...y...y","yy.yyy.yy","yyyyyyyyy","yryyByyry","yyyyyyyyy"],{y:'#f2c14e',r:'#c0392b',B:'#ff7a9c'},0,-f.fw*.24,u*1.5);
+    } else if(stk==='blush'){
+      [f.cL,f.cR].forEach(c=>{ctx.fillStyle='rgba(255,110,150,.42)';ctx.beginPath();ctx.ellipse(c.x,c.y,f.fw*.11,f.fw*.06,f.ang,0,7);ctx.fill();});
+      px(ctx,[".#.#.","#####",".###.","..#.."],{'#':'#ff4d8d'},f.cR.x+f.fw*.12,f.cR.y-f.fw*.18,u*.9);
+    } else if(stk==='lentera'){
+      const cx=(f.L.x+f.R.x)/2,cy=f.top.y;
+      [-1,1].forEach((sd,i)=>{const x=cx+sd*f.fw*.62,y=cy+Math.sin(t*2+i)*f.fw*.06;
+        ctx.fillStyle='rgba(255,207,110,.28)';ctx.beginPath();ctx.arc(x,y,f.fw*.13,0,7);ctx.fill();
+        px(ctx,LANTERN,{k:'#3a2a1a',r:'#c0392b',y:'#ffcf6e',Y:'#fff4c2'},x,y,u*1.1);});
+    } else if(stk==='bintang'){
+      const cx=(f.L.x+f.R.x)/2,cy=f.top.y;
+      for(let i=0;i<6;i++){const a=t*1.5+i*Math.PI/3;px(ctx,STAR,{y:i%2?'#f2c14e':'#ffffff'},cx+Math.cos(a)*f.fw*.62,cy+Math.sin(a)*f.fw*.18,u*.9);}
+    } else if(stk==='santa'){
+      ctx.translate(f.top.x,f.top.y); ctx.rotate(f.ang);
+      px(ctx,["..........WW","........rrWW","......rrrr..","....rrrrrr..","..rrrrrrrr..","WWWWWWWWWWWW"],{r:'#c0392b',W:'#ffffff'},f.fw*.04,-f.fw*.1,u*1.5);
+    }
+    ctx.restore();
   }
 
-  /* --- frame ulos --- */
-  function ulosBand(x,W,y0,hgt){
-    const k=Math.max(2,Math.round(hgt/12));
+  async function loadLandmarker(){
+    if(landmarker||lmLoading)return; lmLoading=true; $('#bface').textContent='nyiapin stiker wajah…';
+    try{
+      const v=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs');
+      const fs=await v.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+      landmarker=await v.FaceLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',delegate:'GPU'},runningMode:'VIDEO',numFaces:1});
+      $('#bface').textContent=''; if(mode==='up'){detectUpload();renderUpload();}
+    }catch(e){ $('#bface').textContent='stiker wajah nggak bisa dimuat di HP ini, tapi filternya tetap jalan 🙂'; }
+    lmLoading=false;
+  }
+  const LW=480,LH=640;
+  function liveLoop(){
+    if(!liveOn)return;
+    if(video.readyState>=2){
+      bcv.width=LW; bcv.height=LH;
+      const map=drawSource(bx,video,video.videoWidth,video.videoHeight,LW,LH,true,fil);
+      if(landmarker){try{const r=landmarker.detectForVideo(video,performance.now());lastFace=r.faceLandmarks&&r.faceLandmarks[0]?r.faceLandmarks[0]:null;}catch(e){lastFace=null;}}
+      if(lastFace) drawSticker(bx,facePts(lastFace,map,LW,true),performance.now()/1000);
+      if(landmarker) $('#bface').textContent=lastFace||stk==='none'?'':'hadapin muka ke kamera ya 🙂';
+    }
+    requestAnimationFrame(liveLoop);
+  }
+  function showLive(){
+    $('#bempty').style.display='none'; bcv.style.display='block'; $('#bstart').hidden=true; $('#blive').hidden=false; $('#bresult').hidden=true; $('#bstage').hidden=false;
+    $('#bstrip').style.display=mode==='cam'?'':'none'; $('#bsnap').textContent=mode==='cam'?'📸 1 foto':'✨ jadiin';
+  }
+  function stopCam(){ liveOn=false; if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;} }
+  $('#bcam').addEventListener('click',async()=>{
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:960}},audio:false});
+      video.srcObject=stream; await video.play();
+      mode='cam'; showLive(); liveOn=true; liveLoop(); loadLandmarker();
+    }catch(e){ $('#bempty').textContent='Kameranya nggak bisa dibuka (mungkin belum diizinkan). Pakai "dari galeri" aja ya 🙂'; }
+  });
+  $('#bfile').addEventListener('change',async e=>{
+    const f=e.target.files[0]; if(!f)return; e.target.value='';
+    try{ upImg=await createImageBitmap(f,{imageOrientation:'from-image'}); }
+    catch(err){ upImg=await new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=URL.createObjectURL(f);}); }
+    if(!upImg){ $('#bempty').textContent='Fotonya nggak kebaca, coba foto lain ya.'; return; }
+    stopCam(); mode='up'; upFace=null; showLive(); detectUpload(); renderUpload(); loadLandmarker();
+  });
+  const iw=()=>upImg.naturalWidth||upImg.width, ih=()=>upImg.naturalHeight||upImg.height;
+  function detectUpload(){ if(!landmarker||!upImg)return; try{const r=landmarker.detectForVideo(upImg,performance.now());upFace=r.faceLandmarks&&r.faceLandmarks[0]?r.faceLandmarks[0]:null;}catch(e){upFace=null;}
+    $('#bface').textContent=upFace||stk==='none'?'':'mukanya nggak ketemu di foto ini, tapi filternya tetap jalan 🙂'; }
+  function drawUpload(ctx,w){
+    const h=Math.round(w*ih()/iw()); ctx.canvas.width=w; ctx.canvas.height=h;
+    const map=drawSource(ctx,upImg,iw(),ih(),w,h,false,fil);
+    if(upFace) drawSticker(ctx,facePts(upFace,map,w,false),1);
+  }
+  function renderUpload(){ if(upImg) drawUpload(bx,480); }
+  function captureFrame(){
+    const c=document.createElement('canvas'),x=c.getContext('2d',{willReadFrequently:true});
+    if(mode==='cam'){ c.width=900;c.height=1200; const map=drawSource(x,video,video.videoWidth,video.videoHeight,900,1200,true,fil);
+      if(lastFace) drawSticker(x,facePts(lastFace,map,900,true),performance.now()/1000); }
+    else drawUpload(x,Math.min(1080,iw()));
+    return c;
+  }
+  function flash(){const f=$('#bflash');f.style.transition='none';f.style.opacity=.9;requestAnimationFrame(()=>{f.style.transition='opacity .35s';f.style.opacity=0;});}
+  async function countdown(){const el=$('#bcount');for(const n of['3','2','1']){el.textContent=n;await new Promise(r=>setTimeout(r,750));}el.textContent='';}
+
+  // susun hasil: latar malam berbintang + frame ulos + tulisan "Sebelum Tidur"
+  function ulosBand(x,W,y0,k){
     const K='#141414',Rd='#8e1b1b',Wh='#efe6d6',G='#c9a227';
     for(let col=0;col*k<W;col++)for(let row=0;row<12;row++){
       let c;if(row===0||row===11)c=K;else if(row===1||row===10)c=Wh;else if(row===2||row===9)c=Rd;
-      else{const dx=Math.abs((col%8)-3.5),dy=Math.abs(row-5.5),dd=dx+dy;c=dd<1.5?G:dd<2.6?Wh:dd<3.6?K:Rd;}
+      else{const dx=Math.abs((col%8)-3.5),dy=Math.abs(row-5.5),d=dx+dy;c=d<1.5?G:d<2.6?Wh:d<3.6?K:Rd;}
       x.fillStyle=c;x.fillRect(col*k,y0+row*k,k,k);}
     return 12*k;
   }
-
-  let base=null, cache={}, filter='asli', stickers=[], frame=false, drag=null;
-  function render(){
-    if(!base)return;
-    const W=base.width,H=base.height; out.width=W; out.height=H;
-    if(!cache[filter])cache[filter]=makeFiltered(base,filter);
-    ox.drawImage(cache[filter],0,0);
-    if(frame){const hgt=Math.round(W/22);ulosBand(ox,W,0,hgt);ulosBand(ox,W,H-12*Math.max(2,Math.round(hgt/12)),hgt);}
-    ox.imageSmoothingEnabled=false;
-    stickers.forEach(s=>{const sp=STK_SP[s.t];ox.drawImage(sp,s.x-sp.width*s.k/2,s.y-sp.height*s.k/2,sp.width*s.k,sp.height*s.k);});
+  function compose(frames){
+    const strip=frames.length>1, W=strip?640:Math.max(640,frames[0].width), pad=Math.round(W*.06), k=Math.max(2,Math.round(W/200)), band=12*k;
+    const fw=W-pad*2, fhs=frames.map(f=>Math.round(fw*f.height/f.width));
+    const head=strip?Math.round(W*.17):Math.round(W*.04), foot=Math.round(W*(strip?.2:.17)), gap=Math.round(pad*.5);
+    const H=band+head+fhs.reduce((a,b)=>a+b,0)+gap*(frames.length-1)+foot+band;
+    const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+    const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1c1d45');g.addColorStop(1,'#3b2f6a');x.fillStyle=g;x.fillRect(0,0,W,H);
+    x.fillStyle='rgba(255,247,208,.7)';for(let i=0;i<90;i++){const s=i%7?Math.max(1,k/2):k;x.fillRect((i*137.5)%W,(i*71.3)%H,s,s);}
+    ulosBand(x,W,0,k); ulosBand(x,W,H-band,k);
+    let y=band+head;
+    x.textAlign='center';
+    if(strip){x.fillStyle='#f2c14e';x.font=`600 ${Math.round(W*.075)}px "Pixelify Sans"`;x.fillText('Sebelum Tidur 🌙',W/2,band+head*.66);}
+    frames.forEach((f,i)=>{x.fillStyle='#fff7ea';x.fillRect(pad-6,y-6,fw+12,fhs[i]+12);x.drawImage(f,pad,y,fw,fhs[i]);y+=fhs[i]+gap;});
+    y+=-gap;
+    const cap=(note.value||'').trim();
+    x.fillStyle='#fff7ea';x.font=`600 ${Math.round(W*.05)}px "Pixelify Sans"`;
+    x.fillText(cap||(strip?'cantik, sah 💖':'Sebelum Tidur 🌙'),W/2,y+foot*.45);
+    x.fillStyle='#cfc6e6';x.font=`400 ${Math.round(W*.03)}px "Pixelify Sans"`;
+    x.fillText(new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})+'  ·  photobooth lentera 🏮',W/2,y+foot*.72);
+    return c;
   }
-  function chips(){
-    $('#filterChips').innerHTML=FILTERS.map(([id,lbl])=>`<button class="chip ${id===filter?'on':''}" data-f="${id}">${lbl}</button>`).join('');
-    const sc=$('#stickerChips'); sc.innerHTML='';
-    Object.keys(STK).forEach(k=>{const b=document.createElement('button');b.className='chip';b.dataset.s=k;const cv=document.createElement('canvas');
-      const sp=STK_SP[k];cv.width=sp.width;cv.height=sp.height;cv.getContext('2d').drawImage(sp,0,0);b.append(cv,document.createTextNode(k));sc.append(b);});
-    const fb=document.createElement('button');fb.className='chip'+(frame?' on':'');fb.dataset.frame='1';fb.textContent='frame ulos';sc.append(fb);
+  let result=null, lastFrames=null;
+  async function finish(frames){
+    lastFrames=frames; await document.fonts.load('600 40px "Pixelify Sans"').catch(()=>{});
+    result=compose(frames); $('#bimg').src=result.toDataURL('image/jpeg',.9);
+    stopCam(); $('#blive').hidden=true; $('#bstage').hidden=true; $('#bresult').hidden=false; status.textContent=''; send.disabled=false;
   }
-  $('#filterChips').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;filter=b.dataset.f;chips();render();});
-  $('#stickerChips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!base)return;
-    if(b.dataset.frame){frame=!frame;chips();render();return;}
-    const sp=STK_SP[b.dataset.s],k=Math.max(2,Math.round(base.width/7/Math.max(sp.width,sp.height)));
-    const n=stickers.length;stickers.push({t:b.dataset.s,k,x:base.width*(0.3+((n*0.17)%0.45)),y:base.height*(0.3+((n*0.23)%0.45))});render();});
-  $('#clearStk').addEventListener('click',()=>{stickers=[];render();});
-
-  // geser stiker
-  const pos=e=>{const r=out.getBoundingClientRect();return[(e.clientX-r.left)/r.width*out.width,(e.clientY-r.top)/r.height*out.height];};
-  out.addEventListener('pointerdown',e=>{const[x,y]=pos(e);
-    for(let i=stickers.length-1;i>=0;i--){const s=stickers[i],sp=STK_SP[s.t],hw=sp.width*s.k/2+8,hh=sp.height*s.k/2+8;
-      if(Math.abs(x-s.x)<hw&&Math.abs(y-s.y)<hh){drag={s,dx:x-s.x,dy:y-s.y};stickers.push(stickers.splice(i,1)[0]);out.setPointerCapture(e.pointerId);e.preventDefault();return;}}});
-  out.addEventListener('pointermove',e=>{if(!drag)return;const[x,y]=pos(e);drag.s.x=x-drag.dx;drag.s.y=y-drag.dy;render();});
-  ['pointerup','pointercancel'].forEach(ev=>out.addEventListener(ev,()=>{drag=null;}));
-
-  // perkecil foto (maks 1600px) — sekalian membuang metadata seperti lokasi
-  async function load(file){
-    let img;
-    try{ img=await createImageBitmap(file,{imageOrientation:'from-image'}); }
-    catch(e){ img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(file);}); }
-    const s=Math.min(1,1600/Math.max(img.width,img.height)), cv=document.createElement('canvas');
-    cv.width=Math.round(img.width*s); cv.height=Math.round(img.height*s);
-    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height); return cv;
-  }
-  input.addEventListener('change',async()=>{
-    const f=input.files&&input.files[0]; if(!f)return;
-    status.textContent='lagi disiapin…'; send.disabled=true;
-    try{ base=await load(f); cache={}; filter='asli'; stickers=[]; frame=false; chips(); render(); editor.classList.add('show');
-         $('#pickText').textContent='ganti foto'; status.textContent='cantik. mau dikasih filter dulu? ✨'; send.disabled=false; }
-    catch(e){ base=null; status.textContent='Fotonya nggak kebaca. Coba foto lain ya.'; }
-  });
-  send.addEventListener('click',async()=>{
-    if(!base)return;
+  note.addEventListener('input',()=>{if(!lastFrames)return;clearTimeout(note._t);note._t=setTimeout(()=>{result=compose(lastFrames);$('#bimg').src=result.toDataURL('image/jpeg',.9);},300);});
+  $('#bsnap').addEventListener('click',async()=>{ if(mode==='cam'){await countdown();flash();} finish([captureFrame()]); });
+  $('#bstrip').addEventListener('click',async()=>{ const fr=[]; for(let i=0;i<4;i++){await countdown();flash();fr.push(captureFrame());await new Promise(r=>setTimeout(r,400));} finish(fr); });
+  function reset(){ stopCam(); $('#bresult').hidden=true; $('#blive').hidden=true; $('#bstage').hidden=false; $('#bempty').style.display='block'; $('#bempty').textContent='buka kamera atau pilih foto dari galeri ✨'; bcv.style.display='none'; $('#bstart').hidden=false; upImg=null; upFace=null; lastFrames=null; }
+  $('#bagain').addEventListener('click',reset); $('#bback').addEventListener('click',reset);
+  $('#bsave').addEventListener('click',()=>{ if(!result)return; result.toBlob(b=>{const a=document.createElement('a');a.download='sebelum-tidur.jpg';a.href=URL.createObjectURL(b);document.body.appendChild(a);a.click();a.remove();},'image/jpeg',.92); });
+  send.addEventListener('click',()=>{
+    if(!result||!WORKER_URL)return;
     send.disabled=true; status.textContent='lagi dikirim lewat bulan… 🌙';
-    render(); const blob=await new Promise(res=>out.toBlob(res,'image/jpeg',0.88));
-    const fd=new FormData(); fd.append('photo',blob,'foto.jpg'); fd.append('note',note.value.trim().slice(0,200));
-    try{
-      const r=await fetch(WORKER_URL,{method:'POST',body:fd}); const j=await r.json().catch(()=>({}));
-      if(!r.ok||!j.ok) throw new Error(j.error||r.status);
-      status.textContent='Terkirim! 💌 Si pembawa lentera pasti senyum-senyum sendiri.';
-      toast('Terkirim ke si pembawa lentera 🏮');
-      base=null; cache={}; input.value=''; note.value=''; $('#pickText').textContent='kirim foto lain';
-      setTimeout(()=>editor.classList.remove('show'),2500);
-    }catch(e){ status.textContent='Yah, gagal kirim. Coba lagi sebentar ya.'; send.disabled=false; }
+    result.toBlob(async b=>{
+      const fd=new FormData(); fd.append('photo',b,'foto.jpg'); fd.append('note',(note.value||'').trim().slice(0,200));
+      try{ const r=await fetch(WORKER_URL,{method:'POST',body:fd}); const j=await r.json().catch(()=>({}));
+        if(!r.ok||!j.ok) throw new Error(j.error||r.status);
+        status.textContent='Terkirim! 💌 Si pembawa lentera pasti senyum-senyum sendiri.'; toast('Terkirim ke si pembawa lentera 🏮');
+      }catch(e){ status.textContent='Yah, gagal kirim. Coba lagi sebentar ya.'; send.disabled=false; }
+    },'image/jpeg',.88);
   });
+  // matikan kamera kalau halaman ditinggal
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden&&stream){ reset(); } });
 })();
 
 /* ---------- halaman mimpi (tombol sendiri) ---------- */
