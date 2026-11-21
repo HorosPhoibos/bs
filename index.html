@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sebelum Tidur</title>
 <meta name="description" content="Cerita pendek buat dibaca pelan-pelan sebelum tidur.">
+<meta property="og:title" content="Sebelum Tidur 🌙">
+<meta property="og:description" content="cerita pendek, buat dibaca pelan-pelan">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#1c1d45">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -556,6 +560,11 @@ const D = (()=>{const q=new URLSearchParams(location.search).get('tanggal');cons
 const MON=D.getMonth()+1, DATE=D.getDate();
 const NATAL = MON===12 && DATE<=26;
 const NEWYEAR = (MON===12 && DATE===31) || (MON===1 && DATE===1);
+// ulang tahun: 27 Maret 2000
+const AGE = D.getFullYear()-2000;
+const BDAY = MON===3 && DATE===27;
+const BDAY_OPEN = MON===3 && DATE>=27;                       // amplop ultah kebuka 27–31 Maret
+const BDAY_SOON = MON===3 && DATE>=20 && DATE<27;
 // topi Natal untuk sprite 16 kolom (gx,gy = pojok kiri atas sprite, s = skala)
 function hat(c,gx,gy,s){
   R(c,gx+4*s,gy-3*s,8*s,3*s,'#c0392b');R(c,gx+6*s,gy-5*s,6*s,2*s,'#c0392b');R(c,gx+9*s,gy-6*s,4*s,1*s,'#a8323a');
@@ -1333,22 +1342,34 @@ const ENVS=[
     "Wah, ketemu semua. Teliti banget sih kamu.",
     "Oke, karena kamu udah nyari sejauh ini, aku jujur sedikit: website ini dibikin pelan-pelan, satu piksel demi satu piksel, buat satu orang aja.",
     "Aku nggak minta apa-apa. Aku cuma pengen ada satu tempat di internet yang isinya: kamu itu berharga, kamu itu disayang, dan kamu nggak perlu berubah jadi siapa-siapa.",
-    "Kalau suatu hari kamu penasaran siapa yang bawa lentera… mungkin jawabannya lebih dekat dari yang kamu kira."]}
+    "Kalau suatu hari kamu penasaran siapa yang bawa lentera… mungkin jawabannya lebih dekat dari yang kamu kira."]},
+  {id:'ultah',label:'terkunci',title:'buka di hari ulang tahunmu',wide:true,bday:true,body:[
+    "Selamat ulang tahun! 🎂",
+    ...(AGE===27?["Ke-27, di tanggal 27. Namanya <b>golden birthday</b>, cuma sekali seumur hidup. Dan kebetulan jatuh di tahun ini. Bulan aja iri."]:[]),
+    "Hari ini dunia dapat satu tahun lagi bareng kamu, dan jujur aja, dunia beruntung.",
+    "Makasih udah terus jadi orang yang sabar, berani, lucu, centil, dan baik hati. Kadang semuanya dalam satu hari.",
+    "Doa kecil buat tahun ini: semoga cap di paspormu nambah, lemburmu berkurang, hatimu tenang, dan semua orang yang kamu sayang sehat.",
+    "Dan Mama, kayaknya lagi senyum lebar di atas sana. Anak gadisnya udah sebesar ini, seberani ini.",
+    "Tiup lilinnya. Make a wish. Lenteranya ikut nyala buat kamu 🕯️🏮"]}
 ];
 let opened=new Set(store.get('st_opened',[]));
+function isLocked(e){return (e.secret&&found.size<8)||(e.bday&&!BDAY_OPEN);}
 function renderEnvs(){
   const n=found.size; $('#lanternCount').textContent=n;
   $('#envs').innerHTML=ENVS.map(e=>{
-    const locked=e.secret&&n<8, cls=['env',e.wide?'wide':'',locked?'locked':'',(!locked&&opened.has(e.id))?'opened':''].join(' ');
-    const title=e.secret&&!locked?'buat yang udah nemu semua lentera':e.title;
-    return `<button class="${cls}" data-id="${e.id}"><span class="seal">${locked?'🔒':'🏮'}</span><small>${locked?'terkunci · '+n+'/8 lentera':e.secret?'akhirnya kebuka':e.label}</small><b>${title}</b></button>`;
+    const locked=isLocked(e), cls=['env',e.wide?'wide':'',locked?'locked':'',(!locked&&opened.has(e.id))?'opened':''].join(' ');
+    let small=e.label,title=e.title,seal='🏮';
+    if(e.secret){small=locked?'terkunci · '+n+'/8 lentera':'akhirnya kebuka';title=locked?e.title:'buat yang udah nemu semua lentera';}
+    if(e.bday){small=locked?'terkunci · buka tanggal 27 Maret':'hari ini hari kamu';title=locked?e.title:'selamat ulang tahun 🎂';seal='🎂';}
+    if(locked)seal='🔒';
+    return `<button class="${cls}" data-id="${e.id}"><span class="seal">${seal}</span><small>${small}</small><b>${title}</b></button>`;
   }).join('');
 }
 $('#envs').addEventListener('click',ev=>{
   const b=ev.target.closest('.env'); if(!b||b.classList.contains('locked'))return;
   const e=ENVS.find(x=>x.id===b.dataset.id);
-  $('#letterLabel').textContent=e.secret?'surat rahasia':'buka kalau';
-  $('#letterTitle').textContent=e.secret?'Buat yang udah nemu semua lentera':e.title.charAt(0).toUpperCase()+e.title.slice(1);
+  $('#letterLabel').textContent=e.secret?'surat rahasia':e.bday?'surat ulang tahun':'buka kalau';
+  $('#letterTitle').textContent=e.secret?'Buat yang udah nemu semua lentera':e.bday?`Selamat ulang tahun ke-${AGE}`:e.title.charAt(0).toUpperCase()+e.title.slice(1);
   $('#letterBody').innerHTML=e.body.map(p=>`<p>${p}</p>`).join('');
   $('#letter').classList.add('show'); $('#letter .paper').scrollTop=0;
   opened.add(e.id); store.set('st_opened',[...opened]); renderEnvs();
@@ -1447,6 +1468,7 @@ const replies=[
   [/mimpi|piala|juara|sertifikat/,"Mimpinya disimpan bulan. Pialanya beneran kok, cuma belum dikirim aja 🏆"],
   [/kaca|cantik|centil|manis|alis/,"Bulan konfirmasi: kacanya jujur. Cantik, manis, centil dikit. Pas 💖"],
   [/mama|bipo|inang/,"Bintang yang paling terang malam ini kayaknya lagi senyum 🤍"],
+  [/ulang tahun|ultah|birthday|27 maret/,BDAY?"SELAMAT ULANG TAHUN! 🎂 Bulan nyanyi dalam hati (suaranya fals, jadi dalam hati aja)":"27 Maret, kan? Bulan udah catat. Tunggu aja, ada amplop yang kebuka hari itu 💌"],
   [/natal|christmas|desember/,"Selamat menyambut Natal 🎄 Semoga damainya sampai ke hatimu, dan ibadahmu di GKPS teduh."],
   [/tahun baru|new year/,"Selamat tahun baru! Paspornya siap diisi cap baru tahun ini ✈️"],
   [/haholongan|holong/,"Holong… 🤍 Bulan nggak berani jawab yang itu. Tapi ada yang bawa lentera, mungkin dia bisa 🤭"],
@@ -1618,14 +1640,14 @@ document.addEventListener('copy',()=>toast('dicopy buat siapa hayo 👀'));
 // 7. tap judul 5x → hujan hati
 (() => {
   let taps=[];
-  $('.hero h1').addEventListener('click',()=>{
+  $('.hero h1').addEventListener('click',ev=>{
     const now=Date.now(); taps=taps.filter(t=>now-t<2000); taps.push(now);
     if(taps.length<5)return; taps=[];
     const hearts=['❤️','💖','💗','💕','🤍','💛'];
     for(let i=0;i<36;i++){const h=document.createElement('span');h.className='heart-rain';h.textContent=hearts[i%hearts.length];
       h.style.left=Math.random()*100+'vw';h.style.animationDuration=(2.5+Math.random()*2.5)+'s';h.style.animationDelay=(Math.random()*1.2)+'s';h.style.fontSize=(16+Math.random()*18)+'px';
       document.body.appendChild(h);setTimeout(()=>h.remove(),6500);}
-    toast('ketahuan suka iseng 💖');
+    if(ev.isTrusted)toast('ketahuan suka iseng 💖');
   });
 })();
 
@@ -1701,6 +1723,8 @@ document.addEventListener('copy',()=>toast('dicopy buat siapa hayo 👀'));
   if(MON===12&&(DATE===24||DATE===25)){label='🎄 malam Natal';text='Selamat Natal. Semoga damai Natal di GKPS memeluk kamu, dan tahun depan bawa cap-cap baru di paspormu.';}
   else if(MON===12&&DATE===26){label='🎄 Natal kedua';text='Selamat Natal kedua! Masih sah makan kue Natal sepuasnya hari ini 😄';}
   else if(NATAL){label='🎄 Desember';text=`Tinggal ${25-DATE} hari lagi Natal. `+text;}
+  else if(BDAY){label='🎂 hari ini hari kamu';text=(AGE===27?'Ke-27 di tanggal 27, golden birthday! ':'')+'Selamat ulang tahun! Ada amplop yang baru kebuka di halaman paling bawah 💌';}
+  else if(BDAY_SOON){label='👀 sebentar lagi';text=`${27-DATE} hari lagi ada yang ulang tahun. Siapa ya? `+text;}
   else if(NEWYEAR){label='🎆 tahun baru';text=MON===12?'Malam terakhir tahun ini. Makasih udah bertahan sejauh ini. Tahun depan, lebih banyak tiket ya ✈️':'Selamat tahun baru! Halaman paspor baru, mimpi baru. Bulan ikut nemenin.';}
   $('#dailyLabel').textContent=label; $('#dailyText').textContent=text;
 })();
@@ -1717,7 +1741,8 @@ document.addEventListener('copy',()=>toast('dicopy buat siapa hayo 👀'));
     requestAnimationFrame(tick);})(0);
 })();
 // 12. tahun baru: hujan hati otomatis sekali
-if(NEWYEAR) setTimeout(()=>{const h1=$('.hero h1');for(let i=0;i<5;i++)h1.click();},1200);
+if(NEWYEAR||BDAY) setTimeout(()=>{const h1=$('.hero h1');for(let i=0;i<5;i++)h1.click();},1200);
+if(BDAY) setTimeout(()=>toast(`🎂 Selamat ulang tahun ke-${AGE}!`),4200);
 
 /* ---------- untuk yang iseng buka console ---------- */
 console.log("%c✦ hai, yang suka ngintip console.\n%cnamanya nggak pernah ditulis di sini.\nTapi bintang-bintang di bab terakhir tahu.","font:16px monospace;color:#f2c14e","font:13px monospace;color:#9a90c0");
