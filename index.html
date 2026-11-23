@@ -325,7 +325,7 @@
     <div class="card reveal"><p>Udah puas gaya, jendela dibuka sedikit.</p>
       <p>Bulan malam ini kebetulan lagi pengen ngobrol.</p></div>
 
-    <div class="frame reveal"><canvas class="px" id="sRoom" width="160" height="100"></canvas><span class="tap">tap bulannya</span></div>
+    <div class="frame reveal"><canvas class="px" id="sRoom" width="160" height="100"></canvas><span class="tap">tap bulan, koper, atau orangnya</span></div>
     <div class="bubble reveal" id="moonBubble">…</div>
 
     <div class="card reveal">
@@ -895,10 +895,49 @@ const moonLines=[
 ];
 let moonIdx=0, moonTapT=-9, shootT=-9;
 const roomStars=(()=>{const r=rnd(7);return Array.from({length:22},()=>[16+r()*60,10+r()*46,r()*6]);})();
+let danceT=-99, kofIdx=0;
+const DANCE=6.6;                                 // detik joget (8 pose x 0,8 dtk)
+const DANCER_ROWS=["....hhhhhhhh....", "...hhHhhhhhhh...", "..hhhHHhhhhhhh..", ".hhhhhhhhhhhhhh.", ".hhhsssssssshhh.", ".hhsssssssssshh.", ".hhseesssseeshh.", ".hhsbssssssbshh.", ".hhssssmmsssshh.", "hhhh.ssssss.hhhh", "hhhh..ssss..hhhh", "hhsprwrpwrprshh.", ".hsrpwprwprwrsh.", ".hsprrwpprwrpsh.", "..swrprwpwrprs..", "...rpwrpwrpwrgg.", "...cccccccccggg.", "...cccccccccgg..", "....ss....ss....", "....ss....ss....", "....ss....ss....", "...SSS....SSS..."];
+const DANCER_PAL={h:'#3b2418',H:'#5a3826',s:'#f6cfae',S:'#e0a98a',e:'#2a1a22',b:'#f39a9a',m:'#c94a62',r:'#d8323a',p:'#f4a6b8',w:'#fff4f4',c:'#efe3cf',g:'#c9a46a'};
+// lengan digambar terpisah per pose, jadi lengan bawaan di sprite dihapus
+const DANCER_BODY=DANCER_ROWS.map((r,j)=>j===12||j===13?r.slice(0,2)+'h'+r.slice(3,13)+'h'+r.slice(14):j===14?r.slice(0,2)+'.'+r.slice(3,13)+'.'+r.slice(14):r);
+// tampak belakang: wajah & leher tertutup rambut
+const DANCER_BACKR=DANCER_BODY.map((r,j)=>{const a=[...r];
+  if(j>=4&&j<=8)for(let i=0;i<16;i++){if(a[i]!=='.')a[i]='h';}
+  if(j>=9&&j<=13)for(let i=4;i<=11;i++)a[i]='h';
+  return a.join('');});
+const DANCER=sprite(DANCER_BODY,DANCER_PAL,2), DANCER_BLINK=sprite(DANCER_BODY,{...DANCER_PAL,e:'#e0a98a'},2), DANCER_BACK=sprite(DANCER_BACKR,DANCER_PAL,2);
+// koreografi dari video: sibak rambut kanan, sibak rambut kiri, ta-da, berbalik, ta-da, tangan di pinggang, tangan di kepala, peace
+const DN={dl:[4,28,4,33],dr:[28,28,28,33]};
+const POSES_DANCE=[
+  {l:DN.dl,r:[31,14,25,5]},
+  {l:[1,14,7,5],r:DN.dr},
+  {l:[-1,28,-7,33],r:[33,28,39,33]},
+  {back:1,l:DN.dl,r:DN.dr},
+  {l:[-1,28,-7,33],r:[33,28,39,33]},
+  {l:[-2,27,6,31],r:[34,27,26,31]},
+  {l:DN.dl,r:[32,8,19,-1]},
+  {l:DN.dl,r:[33,24,27,14],peace:1}
+];
+function danceArm(c,gx,gy,sx,sy,a,bracelet){
+  const pts=[[sx,sy],[a[0],a[1]],[a[2],a[3]]];
+  for(let k=0;k<2;k++){const[x0,y0]=pts[k],[x1,y1]=pts[k+1],n=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)/1.5));
+    for(let i=0;i<=n;i++)R(c,gx+x0+(x1-x0)*i/n-1,gy+y0+(y1-y0)*i/n-1,3,3,'#f6cfae');}
+  R(c,gx+a[2]-2,gy+a[3]-2,4,4,'#f6cfae');
+  if(bracelet){const bx=a[0]+(a[2]-a[0])*.7,by=a[1]+(a[3]-a[1])*.7;R(c,gx+bx-1,gy+by-1,3,2,'#e8c25a');}
+}
+const NOTE=["..##","..#.","..#.","###.","###."];
+const noteSp=sprite(NOTE,{'#':'#fff2c2'},1);
+const kofLines=[
+  "🧳 Kopernya udah nunggu di atas lemari. Tinggal nentuin tujuan ✈️",
+  "🧳 Yang hijau buat Fiji, yang biru buat negeri salju. Mesir? Tas selempang aja cukup 😄",
+  "🧳 Ssst, jangan dibongkar dulu. Nanti juga turun sendiri pas tiketnya udah ada."
+];
 const sRoom=scene('sRoom',(s,t)=>{
-  const c=s.c;
-  R(c,0,0,160,100,'#2a2c55');
-  for(let x=4;x<160;x+=10)for(let y=4;y<80;y+=10)R(c,x,y,1,1,'#33366a');
+  const c=s.c, dancing=(t-danceT)<DANCE, beat=Math.floor(t*1.25)%2;
+  // dinding pink (malam) + titik-titik
+  R(c,0,0,160,100,'#c97f9e');
+  for(let x=4;x<160;x+=10)for(let y=4;y<80;y+=10)R(c,x,y,1,1,'#d692ae');
   // jendela
   R(c,14,8,64,50,'#4a3a5a');
   c.save();c.beginPath();c.rect(16,10,60,46);c.clip();
@@ -906,47 +945,71 @@ const sRoom=scene('sRoom',(s,t)=>{
   roomStars.forEach(([x,y,ph])=>{if(Math.sin(t*2+ph)>-0.3)R(c,x,y,1,1,'#fff7d0');});
   // bintang jatuh
   const sp=(t-shootT)/1.2; if(sp>=0&&sp<1){for(let k=0;k<8;k++){c.globalAlpha=(1-k/8)*(1-sp);R(c,70-sp*50+k*2,14+sp*20-k,1,1,'#fff');}c.globalAlpha=1;}
-  const shake=(t-moonTapT)<0.4?Math.round(Math.sin((t-moonTapT)*60)):0;
+  const shake=(t-moonTapT)<0.4?Math.round(Math.sin((t-moonTapT)*60)):dancing?(beat?1:-1):0;
   const mx=48+shake,my=30;
   disc(c,mx,my,13,`rgba(255,242,194,${0.04+MOON.illum/100*0.1})`);
   c.drawImage(MOON.sprite,mx-10,my-10);
   const talking=(t-moonTapT)<2.2&&Math.floor(t*6)%2===0;
   R(c,mx-5,my-1,2,1,'#5a4a3a');R(c,mx+3,my-1,2,1,'#5a4a3a');
   R(c,mx-6,my+1,2,1,'#f6b0a0');R(c,mx+4,my+1,2,1,'#f6b0a0');
-  if(talking){R(c,mx-1,my+2,3,2,'#8a4a4a');}else{R(c,mx-2,my+2,1,1,'#5a4a3a');R(c,mx-1,my+3,3,1,'#5a4a3a');R(c,mx+2,my+2,1,1,'#5a4a3a');}
+  if(talking||dancing){R(c,mx-1,my+2,3,2,'#8a4a4a');}else{R(c,mx-2,my+2,1,1,'#5a4a3a');R(c,mx-1,my+3,3,1,'#5a4a3a');R(c,mx+2,my+2,1,1,'#5a4a3a');}
   c.restore();
   R(c,45,10,2,46,'#4a3a5a');R(c,16,32,60,2,'#4a3a5a');
   // gorden
   R(c,8,6,9,54,'#d9a441');R(c,11,6,1,54,'#b98a30');R(c,14,6,1,54,'#b98a30');
   R(c,75,6,9,54,'#d9a441');R(c,78,6,1,54,'#b98a30');R(c,81,6,1,54,'#b98a30');
-  R(c,6,4,80,3,'#6b4a3a');R(c,10,58,72,3,'#5a4868');
-  // lampu tumblr
+  R(c,6,4,80,3,'#6b4a3a');R(c,10,58,72,3,'#a8607e');
+  // lemari putih + dua koper di atasnya
+  R(c,124,14,34,46,'#efe8e0');R(c,124,14,34,1,'#ffffff');R(c,140,15,1,34,'#d6cdc4');R(c,124,49,34,1,'#d6cdc4');
+  R(c,137,30,2,5,'#b9a99a');R(c,142,30,2,5,'#b9a99a');R(c,125,15,1,44,'#ddd4cb');
+  R(c,128,7,13,7,'#a8c83c');R(c,128,7,13,1,'#c3de5c');R(c,132,5,5,2,'#7f9a2a');R(c,129,13,2,1,'#5a6a20');R(c,138,13,2,1,'#5a6a20');
+  R(c,142,6,14,8,'#2d4fa3');R(c,142,6,14,1,'#4a6cc0');R(c,147,4,5,2,'#1e3570');R(c,148,9,3,2,'#f2f2f2');
+  // lampu tumblr (lebih heboh pas joget)
   const cols=['#ffd36e','#ff8fab','#8fd3ff'];
   for(let x=2;x<160;x+=9){const y=2+Math.round(Math.sin(x/160*Math.PI)*4);R(c,x,y,1,1,'#5a4a6a');
-    const on=Math.sin(t*2+x)>-0.4;c.globalAlpha=on?1:0.35;R(c,x,y+1,2,2,cols[(x/9|0)%3]);c.globalAlpha=1;}
-  // rak + peta dunia
-  R(c,134,24,24,2,'#6b4a3a');[['#c0392b',8],['#2453a8',10],['#f2c14e',7],['#4c9a5b',9],['#ff8fab',8]].forEach(([col,h],i)=>R(c,135+i*4,24-h,3,h,col));
-  R(c,134,32,24,16,'#8a6048');R(c,135,33,22,14,'#cfe8ef');
-  R(c,137,36,5,4,'#7fb07a');R(c,143,35,6,6,'#7fb07a');R(c,151,38,4,5,'#7fb07a');R(c,140,41,3,3,'#7fb07a');
-  if(Math.floor(t*2)%2)R(c,152,39,1,1,'#c0392b'); R(c,146,37,1,1,'#c0392b');
+    const on=dancing?((x/9|0)%2===beat):Math.sin(t*2+x)>-0.4;c.globalAlpha=on?1:0.35;R(c,x,y+1,2,2,cols[(x/9|0)%3]);c.globalAlpha=1;}
   // lantai + karpet ulos
-  R(c,0,80,160,20,'#3a2f4a');
+  R(c,0,80,160,20,'#6a4560');
   R(c,14,86,64,9,'#8e1b1b');R(c,14,86,64,1,'#141414');R(c,14,94,64,1,'#141414');
   for(let x=16;x<76;x+=6){R(c,x,89,3,3,'#efe6d6');R(c,x+1,90,1,1,'#c9a227');}
   // kasur
   R(c,90,58,70,6,'#f1e6d8');R(c,140,48,18,10,'#ffffff');R(c,140,57,18,1,'#ddd');
-  const blink=(t%4.1)<0.13;
-  c.drawImage(blink?SP.homeBlink:SP.home,98,22);
-  if(NATAL)hat(c,98,22,2);
+  if(!dancing){
+    const blink=(t%4.1)<0.13;
+    c.drawImage(blink?SP.homeBlink:SP.home,98,22);
+    if(NATAL)hat(c,98,22,2);
+  }
   R(c,88,62,72,18,'#e0a63a');for(let x=90;x<160;x+=7)R(c,x,62,2,18,'#c98e2a');R(c,88,70,72,2,'#a8323a');
   R(c,88,80,72,4,'#6b4a5a');
+  // joget di atas karpet
+  if(dancing){
+    const el=t-danceT, pi=Math.min(POSES_DANCE.length-1,Math.floor(el/0.8)), ps=POSES_DANCE[pi], inPose=el-pi*0.8;
+    // goyang pelan: geser 1 piksel kiri-kanan, sedikit naik tiap ganti pose
+    const gx=52+Math.round(Math.sin(el*Math.PI*1.25)), gy=38-(inPose<0.14?1:0);
+    if(ps.back){ c.drawImage(DANCER_BACK,gx,gy); if(NATAL)hat(c,gx,gy,2);
+      danceArm(c,gx,gy,5,23,ps.l,false); danceArm(c,gx,gy,27,23,ps.r,true); }
+    else{
+      c.drawImage((el%2.3)<0.12?DANCER_BLINK:DANCER,gx,gy); if(NATAL)hat(c,gx,gy,2);
+      for(let i=0;i<9;i++)R(c,gx+6+i*2.4,gy+22+i*1.2,2,1,'#a8844f');   // tali tas selempang
+      danceArm(c,gx,gy,5,23,ps.l,false); danceArm(c,gx,gy,27,23,ps.r,true);
+      if(ps.peace){const[hx,hy]=[ps.r[2],ps.r[3]];R(c,gx+hx-2,gy+hy-7,2,5,'#f6cfae');R(c,gx+hx+1,gy+hy-7,2,5,'#f6cfae');}
+    }
+    for(let k=0;k<3;k++){const p=(el*0.45+k/3)%1;c.globalAlpha=1-p;c.drawImage(noteSp,gx-8+k*18+Math.sin(p*5+k)*2,gy+6-p*26);}
+    c.globalAlpha=1;
+  }
 },(s,x,y)=>{
+  const t=performance.now()/1000;
   if(Math.hypot(x-48,y-30)<15){
-    const t=performance.now()/1000;moonTapT=t;
+    moonTapT=t;
     const line=moonLines[moonIdx%moonLines.length];
     if(moonIdx%moonLines.length===3)shootT=t;
     moonIdx++;
     const b=$('#moonBubble');b.textContent="🌙 "+line;b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),250);
+  } else if(x>=126&&x<=158&&y>=2&&y<=15){
+    const b=$('#moonBubble');b.textContent=kofLines[kofIdx++%kofLines.length];b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),250);
+  } else if(x>=96&&x<=132&&y>=20&&y<=64&&(t-danceT)>=DANCE){
+    danceT=t;
+    const b=$('#moonBubble');b.textContent="💃 Joget dulu sebelum tidur. Bulannya ikut goyang.";b.classList.add('pop');setTimeout(()=>b.classList.remove('pop'),250);
   }
 });
 $('#moonBubble').textContent = `🌙 Bentuk bulan di jendela itu sama kayak bulan di langitmu malam ini: ${MOON.name}, sekitar ${MOON.illum}% terang. ` +
