@@ -489,16 +489,15 @@
 
     <div class="card reveal mailbox" id="kotakpos">
       <h3>📸 Photobooth Lentera</h3>
-      <p>Lagi ngerasa cantik? Foto dulu. Filternya banyak, stikernya nempel di muka, bisa juga bikin photostrip 4×.</p>
+      <p>Lagi ngerasa cantik? Foto dulu, terus kirim ke si pembawa lentera. Filternya banyak, stikernya nempel di muka, bisa juga bikin photostrip 4×.</p>
       <div class="bstage" id="bstage">
-        <div class="bempty" id="bempty">buka kamera atau pilih foto dari galeri ✨</div>
+        <div class="bempty" id="bempty">buka kamera dulu ✨</div>
         <canvas id="bcv"></canvas>
         <div id="bcount"></div><div id="bflash"></div>
       </div>
       <video id="bvideo" playsinline muted></video>
       <div class="brow" id="bstart">
         <button class="btn" id="bcam">📷 buka kamera</button>
-        <label class="pick">🖼️ dari galeri<input type="file" id="bfile" accept="image/*"></label>
       </div>
       <div id="blive" hidden>
         <div class="elabel">filter</div><div class="chips" id="bfil"></div>
@@ -508,7 +507,7 @@
           <button class="btn" id="bsnap">📸 1 foto</button>
           <button class="btn alt" id="bstrip">🎞️ photostrip 4×</button>
         </div>
-        <button class="linkbtn" id="bback">↺ ganti kamera / foto</button>
+        <button class="linkbtn" id="bback">↺ tutup kamera</button>
       </div>
       <div id="bresult" hidden>
         <img id="bimg" alt="hasil foto">
@@ -517,12 +516,11 @@
           <button class="btn send" id="photoSend">kirim ke si pembawa lentera 🏮</button>
         </div>
         <div class="brow">
-          <button class="btn alt" id="bsave">⬇️ simpan</button>
           <button class="btn alt" id="bagain">↺ foto lagi</button>
         </div>
         <div class="mstatus" id="photoStatus"></div>
       </div>
-      <p class="fine" id="bfine">cuma si pembawa lentera yang lihat 🏮 · simpan = cuma ke HP kamu</p>
+      <p class="fine" id="bfine">cuma si pembawa lentera yang lihat 🏮</p>
     </div>
 
     <div class="card reveal kangen" id="kangenBox">
@@ -1422,11 +1420,11 @@ $('#envs').addEventListener('click',ev=>{
 /* ---------- kotak pos lentera (foto -> Cloudflare Worker -> Telegram) ---------- */
 // Isi dengan URL Worker setelah dipasang, mis. "https://kotak-pos-lentera.namamu.workers.dev"
 const WORKER_URL = "https://kotak-pos-lentera.horosphoibos.workers.dev/";
-/* ---------- photobooth lentera (kamera langsung / galeri → filter + stiker wajah → kirim/simpan) ---------- */
+/* ---------- photobooth lentera (kamera langsung → filter + stiker wajah → kirim ke si pembawa lentera) ---------- */
 (() => {
   const bcv=$('#bcv'), bx=bcv.getContext('2d',{willReadFrequently:true}), video=$('#bvideo');
   const status=$('#photoStatus'), note=$('#photoNote'), send=$('#photoSend');
-  if(!WORKER_URL){ send.style.display='none'; $('#bfine').textContent='simpan = cuma ke HP kamu'; $('#kacaHint').style.display='none'; }
+  if(!WORKER_URL){ $('#kotakpos').style.display='none'; $('#kacaHint').style.display='none'; return; }
 
   const FILTERS={asli:'asli',pink:'🌸 soft pink',retro:'📼 retro',bw:'🎞️ hitam putih',malam:'🌙 malam bulan',polaroid:'📷 polaroid',pixel:'👾 pixel'};
   const STICKERS={none:'tanpa',headset:'🎧 headset CS',rol:'🎀 rol rambut',mahkota:'👑 mahkota',blush:'😊 blush',lentera:'🏮 lentera',bintang:'✨ bintang'};
@@ -1551,14 +1549,7 @@ const WORKER_URL = "https://kotak-pos-lentera.horosphoibos.workers.dev/";
       stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:960}},audio:false});
       video.srcObject=stream; await video.play();
       mode='cam'; showLive(); liveOn=true; liveLoop(); loadLandmarker();
-    }catch(e){ $('#bempty').textContent='Kameranya nggak bisa dibuka (mungkin belum diizinkan). Pakai "dari galeri" aja ya 🙂'; }
-  });
-  $('#bfile').addEventListener('change',async e=>{
-    const f=e.target.files[0]; if(!f)return; e.target.value='';
-    try{ upImg=await createImageBitmap(f,{imageOrientation:'from-image'}); }
-    catch(err){ upImg=await new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=URL.createObjectURL(f);}); }
-    if(!upImg){ $('#bempty').textContent='Fotonya nggak kebaca, coba foto lain ya.'; return; }
-    stopCam(); mode='up'; upFace=null; showLive(); detectUpload(); renderUpload(); loadLandmarker();
+    }catch(e){ $('#bempty').textContent='Kameranya nggak bisa dibuka. Coba izinkan akses kamera buat website ini di pengaturan browser, terus tap lagi ya 🙂'; }
   });
   const iw=()=>upImg.naturalWidth||upImg.width, ih=()=>upImg.naturalHeight||upImg.height;
   function detectUpload(){ if(!landmarker||!upImg)return; try{const r=landmarker.detectForVideo(upImg,performance.now());upFace=r.faceLandmarks&&r.faceLandmarks[0]?r.faceLandmarks[0]:null;}catch(e){upFace=null;}
@@ -1618,9 +1609,8 @@ const WORKER_URL = "https://kotak-pos-lentera.horosphoibos.workers.dev/";
   note.addEventListener('input',()=>{if(!lastFrames)return;clearTimeout(note._t);note._t=setTimeout(()=>{result=compose(lastFrames);$('#bimg').src=result.toDataURL('image/jpeg',.9);},300);});
   $('#bsnap').addEventListener('click',async()=>{ if(mode==='cam'){await countdown();flash();} finish([captureFrame()]); });
   $('#bstrip').addEventListener('click',async()=>{ const fr=[]; for(let i=0;i<4;i++){await countdown();flash();fr.push(captureFrame());await new Promise(r=>setTimeout(r,400));} finish(fr); });
-  function reset(){ stopCam(); $('#bresult').hidden=true; $('#blive').hidden=true; $('#bstage').hidden=false; $('#bempty').style.display='block'; $('#bempty').textContent='buka kamera atau pilih foto dari galeri ✨'; bcv.style.display='none'; $('#bstart').hidden=false; upImg=null; upFace=null; lastFrames=null; }
+  function reset(){ stopCam(); $('#bresult').hidden=true; $('#blive').hidden=true; $('#bstage').hidden=false; $('#bempty').style.display='block'; $('#bempty').textContent='buka kamera dulu ✨'; bcv.style.display='none'; $('#bstart').hidden=false; upImg=null; upFace=null; lastFrames=null; }
   $('#bagain').addEventListener('click',reset); $('#bback').addEventListener('click',reset);
-  $('#bsave').addEventListener('click',()=>{ if(!result)return; result.toBlob(b=>{const a=document.createElement('a');a.download='sebelum-tidur.jpg';a.href=URL.createObjectURL(b);document.body.appendChild(a);a.click();a.remove();},'image/jpeg',.92); });
   send.addEventListener('click',()=>{
     if(!result||!WORKER_URL)return;
     send.disabled=true; status.textContent='lagi dikirim lewat bulan… 🌙';
